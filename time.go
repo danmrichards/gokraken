@@ -1,4 +1,4 @@
-package public
+package gokraken
 
 const TimeResource = "Time" // The API resource for the Kraken API server time.
 

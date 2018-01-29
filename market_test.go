@@ -1,20 +1,17 @@
-package public
+package gokraken
 
 import (
 	"context"
 	"fmt"
 	"testing"
-
-	"github.com/danmrichards/gokraken"
 )
 
 func TestPublicMarket_Time(t *testing.T) {
 	// TODO: Table test this with a mock api.
 
-	k := gokraken.New()
-	p := &Market{Client: k}
+	k := New()
 
-	resp, err := p.Time(context.Background())
+	resp, err := k.Market.Time(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}

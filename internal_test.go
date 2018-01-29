@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"io/ioutil"
 	"testing"
-
-	"github.com/danmrichards/gokraken/test"
 )
 
 func TestBindJSON(t *testing.T) {
@@ -26,5 +24,5 @@ func TestBindJSON(t *testing.T) {
 		t.Fatalf("could not bind json: %s", err)
 	}
 
-	test.Assert(expectedOutput, output, t)
+	assert(expectedOutput, output, t)
 }
