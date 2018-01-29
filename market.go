@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-// Market is responsible for communicating with all the public data markey
+// Market is responsible for communicating with all the public data market
 // endpoints on the Kraken API.
 type Market struct {
 	Client *Kraken
