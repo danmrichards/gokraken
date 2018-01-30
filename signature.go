@@ -11,7 +11,7 @@ import (
 type Signature struct {
 	APISecret []byte
 	Data      url.Values
-	URL       string
+	URI       string
 }
 
 // Generate returns a message signature for use on private Kraken API endpoints.
@@ -22,9 +22,9 @@ func (s *Signature) Generate() string {
 	sha.Write([]byte(s.Data.Get(APINonceParam) + s.Data.Encode()))
 	shaSum := sha.Sum(nil)
 
-	// HMAC of request URL and the SHA256 sum.
+	// HMAC of request URI and the SHA256 sum.
 	mac := hmac.New(sha512.New, s.APISecret)
-	mac.Write(append([]byte(s.URL), shaSum...))
+	mac.Write(append([]byte(s.URI), shaSum...))
 	macSum := mac.Sum(nil)
 
 	return base64.StdEncoding.EncodeToString(macSum)

@@ -75,7 +75,7 @@ func TestKraken_GetBaseUrl(t *testing.T) {
 	}{
 		{
 			name:    "with base url",
-			baseURL: "api.foo.com",
+			baseURL: "https://api.foo.com",
 		},
 		{
 			name: "without base url",
@@ -141,7 +141,7 @@ func TestKraken_Dial(t *testing.T) {
 	}{
 		{
 			name:        "with base url",
-			baseURL:     "api.foo.com",
+			baseURL:     "https://api.foo.com",
 			method:      http.MethodGet,
 			resource:    "bar",
 			expectedURL: "https://api.foo.com/0/public/bar",
@@ -154,7 +154,7 @@ func TestKraken_Dial(t *testing.T) {
 		},
 		{
 			name:     "POST",
-			baseURL:  "api.foo.com",
+			baseURL:  "https://api.foo.com",
 			method:   http.MethodPost,
 			resource: "bar",
 			body: url.Values{
@@ -166,7 +166,7 @@ func TestKraken_Dial(t *testing.T) {
 		},
 		{
 			name:     "PUT",
-			baseURL:  "api.foo.com",
+			baseURL:  "https://api.foo.com",
 			method:   http.MethodPut,
 			resource: "bar",
 			body: url.Values{
@@ -178,7 +178,7 @@ func TestKraken_Dial(t *testing.T) {
 		},
 		{
 			name:     "PATCH",
-			baseURL:  "api.foo.com",
+			baseURL:  "https://api.foo.com",
 			method:   http.MethodPut,
 			resource: "bar",
 			body: url.Values{
@@ -189,7 +189,7 @@ func TestKraken_Dial(t *testing.T) {
 		},
 		{
 			name:        "DELETE",
-			baseURL:     "api.foo.com",
+			baseURL:     "https://api.foo.com",
 			method:      http.MethodDelete,
 			resource:    "bar",
 			expectedURL: "https://api.foo.com/0/public/bar",
@@ -248,7 +248,7 @@ func TestKraken_DialWithAuth(t *testing.T) {
 			name:        "with base url",
 			privateKey:  "Zm9vMTIzNGJhcg==",
 			apiKey:      "baz2345qux",
-			baseURL:     "api.foo.com",
+			baseURL:     "https://api.foo.com",
 			method:      http.MethodGet,
 			resource:    "bar",
 			expectedURL: "https://api.foo.com/0/private/bar",
@@ -267,7 +267,7 @@ func TestKraken_DialWithAuth(t *testing.T) {
 			name:       "POST",
 			privateKey: "Zm9vMTIzNGJhcg==",
 			apiKey:     "baz2345qux",
-			baseURL:    "api.foo.com",
+			baseURL:    "https://api.foo.com",
 			method:     http.MethodPost,
 			resource:   "bar",
 			body: url.Values{
@@ -281,7 +281,7 @@ func TestKraken_DialWithAuth(t *testing.T) {
 			name:       "PUT",
 			privateKey: "Zm9vMTIzNGJhcg==",
 			apiKey:     "baz2345qux",
-			baseURL:    "api.foo.com",
+			baseURL:    "https://api.foo.com",
 			method:     http.MethodPut,
 			resource:   "bar",
 			body: url.Values{
@@ -295,7 +295,7 @@ func TestKraken_DialWithAuth(t *testing.T) {
 			name:       "PATCH",
 			privateKey: "Zm9vMTIzNGJhcg==",
 			apiKey:     "baz2345qux",
-			baseURL:    "api.foo.com",
+			baseURL:    "https://api.foo.com",
 			method:     http.MethodPut,
 			resource:   "bar",
 			body: url.Values{
@@ -308,7 +308,7 @@ func TestKraken_DialWithAuth(t *testing.T) {
 			name:        "DELETE",
 			privateKey:  "Zm9vMTIzNGJhcg==",
 			apiKey:      "baz2345qux",
-			baseURL:     "api.foo.com",
+			baseURL:     "https://api.foo.com",
 			method:      http.MethodDelete,
 			resource:    "bar",
 			expectedURL: "https://api.foo.com/0/private/bar",
@@ -392,7 +392,7 @@ func TestKraken_ResourceURL(t *testing.T) {
 	}{
 		{
 			name:           "custom base url",
-			baseURL:        "api.foo.com",
+			baseURL:        "https://api.foo.com",
 			namespace:      APIPublicNamespace,
 			resource:       "bar",
 			expectedOutput: "https://api.foo.com/0/public/bar",

@@ -2,20 +2,43 @@ package gokraken
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 func TestPublicMarket_Time(t *testing.T) {
-	// TODO: Table test this with a mock api.
+	mockResponse := Response{
+		Result: map[string]interface{}{
+			"unixtime": time.Now().Unix(),
+			"rfc1123":  time.Now().Format(time.RFC1123),
+		},
+	}
+
+	expectedResult := TimeResponse{
+		UnixTime: time.Now().Unix(),
+		Rfc1123:  time.Now().Format(time.RFC1123),
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		response, _ := json.Marshal(mockResponse)
+		w.Write(response)
+	}))
+
+	defer ts.Close()
 
 	k := New()
+	k.BaseURL = ts.URL
 
 	resp, err := k.Market.Time(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	fmt.Printf("server unix time: %d\n", resp.UnixTime)
-	fmt.Printf("service rfc1123 time: %s\n", resp.Rfc1123)
+	assert(expectedResult, resp, t)
 }

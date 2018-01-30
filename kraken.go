@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	// APIBaseUrl is the base URL of the Kraken API.
-	APIBaseUrl = "api.kraken.com"
+	// APIBaseUrl is the base URI of the Kraken API.
+	APIBaseUrl = "https://api.kraken.com"
 
 	// APIKeyHeader is the header to send the API key to Kraken in.
 	APIKeyHeader = "API-Key"
@@ -30,9 +30,6 @@ const (
 
 	// APIPrivateNamespace is the name of the private Kraken API namespace.
 	APIPrivateNamespace = "private"
-
-	// APIProtocol is the protocol in which to access the Kraken API.
-	APIProtocol = "https"
 
 	// APISignHeader is the header to send the API signature to Kraken in.
 	APISignHeader = "API-Sign"
@@ -98,7 +95,7 @@ func (k *Kraken) initServices() {
 	k.UserData = &UserData{k}
 }
 
-// GetBaseUrl returns the base URL of the Kraken API.
+// GetBaseUrl returns the base URI of the Kraken API.
 // If the BaseURL value is not set on the Kraken struct the constant APIBaseUrl
 // will be returned instead.
 func (k *Kraken) GetBaseUrl() string {
@@ -181,7 +178,7 @@ func (k *Kraken) DialWithAuth(ctx context.Context, method, resource string, body
 	signature := &Signature{
 		APISecret: secret,
 		Data:      body,
-		URL:       k.ResourceURI(APIPrivateNamespace, resource),
+		URI:       k.ResourceURI(APIPrivateNamespace, resource),
 	}
 
 	// Apply headers.
@@ -192,7 +189,7 @@ func (k *Kraken) DialWithAuth(ctx context.Context, method, resource string, body
 	return
 }
 
-// ResourceURI returns the URL path for the given api resource.
+// ResourceURI returns the URI path for the given api resource.
 func (k *Kraken) ResourceURI(namespace, resource string) string {
 	return fmt.Sprintf(
 		"/%d/%s/%s",
@@ -202,11 +199,10 @@ func (k *Kraken) ResourceURI(namespace, resource string) string {
 	)
 }
 
-// ResourceURL returns a fully qualified URL for the given api resource.
+// ResourceURL returns a fully qualified URI for the given api resource.
 func (k *Kraken) ResourceURL(namespace, resource string) string {
 	return fmt.Sprintf(
-		"%s://%s%s",
-		APIProtocol,
+		"%s%s",
 		k.GetBaseUrl(),
 		k.ResourceURI(namespace, resource),
 	)
