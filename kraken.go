@@ -52,7 +52,7 @@ var (
 // Kraken is responsible for all communication with the Kraken API.
 type Kraken struct {
 	APIKey     string
-	BaseUrl    string
+	BaseURL    string
 	HTTPClient *http.Client
 	Market     *Market
 	UserData   *UserData
@@ -99,27 +99,25 @@ func (k *Kraken) initServices() {
 }
 
 // GetBaseUrl returns the base URL of the Kraken API.
-// If the BaseUrl value is not set on the Kraken struct the constant APIBaseUrl
+// If the BaseURL value is not set on the Kraken struct the constant APIBaseUrl
 // will be returned instead.
 func (k *Kraken) GetBaseUrl() string {
-	if k.BaseUrl == "" {
+	if k.BaseURL == "" {
 		return APIBaseUrl
 	}
 
-	return k.BaseUrl
+	return k.BaseURL
 }
 
 // Call performs a request against the Kraken API.
 func (k *Kraken) Call(req *http.Request) (resp *Response, err error) {
 	apiResp, err := k.HTTPClient.Do(req)
 	if err != nil {
-		// TODO: Error logging here.
 		return
 	}
 
 	err = bindJSON(apiResp.Body, &resp)
 	if err != nil {
-		// TODO: Error logging here.
 		return
 	}
 
