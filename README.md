@@ -1,4 +1,4 @@
-# Go Kraken [![GoDoc](https://godoc.org/github.com/danmrichards/gokraken?status.svg)](https://godoc.org/github.com/danmrichards/gokraken) [![License](http://img.shields.io/badge/license-mit_bsd-blue.svg)](https://raw.githubusercontent.com/danmrichards/gokraken/master/LICENSE) [![Go Report Card](https://goreportcard.com/badge/github.com/danmrichards/gokraken)](https://goreportcard.com/report/github.com/danmrichards/gokraken)
+# Go Kraken [![GoDoc](https://godoc.org/github.com/danmrichards/gokraken?status.svg)](https://godoc.org/github.com/danmrichards/gokraken) [![License](http://img.shields.io/badge/license-mit_bsd-blue.svg)](https://raw.githubusercontent.com/danmrichards/gokraken/master/LICENSE) [![Go Report Card](https://goreportcard.com/badge/github.com/danmrichards/gokraken)](https://goreportcard.com/report/github.com/danmrichards/gokraken) [![Build Status](https://travis-ci.org/danmrichards/gokraken.svg?branch=master)](https://travis-ci.org/danmrichards/gokraken)
 A Go API client for the [Kraken](https://www.kraken.com) cryptocurrency exchange
 
 > Note: This is stupidly early in development. Don't use it please...no really don't
