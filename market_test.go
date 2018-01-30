@@ -17,7 +17,7 @@ func TestPublicMarket_Time(t *testing.T) {
 		},
 	}
 
-	expectedResult := TimeResponse{
+	expectedResult := &TimeResponse{
 		UnixTime: time.Now().Unix(),
 		Rfc1123:  time.Now().Format(time.RFC1123),
 	}
