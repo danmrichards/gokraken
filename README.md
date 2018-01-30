@@ -62,7 +62,7 @@ Coming soon
 - [x] Base repo structure
 - [x] Public API calls working
 - [x] Private API calls working
-- [ ] Travis CI
+- [x] Travis CI
 - [ ] Implement public market data endpoints
 - [ ] Implement private user data endpoints
 - [ ] Implement private user trading endpoints
