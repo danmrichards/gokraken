@@ -32,13 +32,13 @@ func (p *Market) Time(ctx context.Context) (resp *TimeResponse, err error) {
 
 // Assets returns asset information from Kraken.
 // https://www.kraken.com/en-gb/help/api#get-asset-info
-func (p *Market) Assets(ctx context.Context, assetReq *AssetsRequest) (resp *AssetsResponse, err error) {
+func (p *Market) Assets(ctx context.Context, assetReq *AssetsRequest) (resp AssetsResponse, err error) {
 	if assetReq == nil {
 		assetReq = &AssetsRequest{}
 	}
 
 	if assetReq.Info == "" {
-		assetReq.Info = "info"
+		assetReq.Info = AssetInfo
 	}
 
 	if assetReq.AClass == "" {
@@ -46,7 +46,7 @@ func (p *Market) Assets(ctx context.Context, assetReq *AssetsRequest) (resp *Ass
 	}
 
 	body := url.Values{
-		"info":   []string{assetReq.Info},
+		"info":   []string{string(assetReq.Info)},
 		"aclass": []string{assetReq.AClass},
 	}
 
@@ -60,6 +60,65 @@ func (p *Market) Assets(ctx context.Context, assetReq *AssetsRequest) (resp *Ass
 	}
 
 	req, err := p.Client.Dial(ctx, http.MethodPost, AssetsResource, body)
+	if err != nil {
+		return
+	}
+
+	krakenResp, err := p.Client.Call(req)
+	if err != nil {
+		return
+	}
+
+	err = krakenResp.ExtractResult(&resp)
+	return
+}
+
+// AssetPairs returns tradable asset pairs from Kraken.
+// https://www.kraken.com/en-gb/help/api#get-tradable-pairs
+func (p *Market) AssetPairs(ctx context.Context, assetPairReq *AssetPairsRequest) (resp AssetPairsResponse, err error) {
+	if assetPairReq == nil {
+		assetPairReq = &AssetPairsRequest{}
+	}
+
+	if assetPairReq.Info == "" {
+		assetPairReq.Info = AssetPairsInfo
+	}
+
+	body := url.Values{
+		"info": []string{string(assetPairReq.Info)},
+	}
+
+	if len(assetPairReq.Pairs) > 0 {
+		pairStrings := make([]string, len(assetPairReq.Pairs))
+		for i, asset := range assetPairReq.Pairs {
+			pairStrings[i] = string(asset)
+		}
+
+		body.Add("pair", strings.Join(pairStrings, ","))
+	}
+
+	req, err := p.Client.Dial(ctx, http.MethodPost, AssetPairsResource, body)
+	if err != nil {
+		return
+	}
+
+	krakenResp, err := p.Client.Call(req)
+	if err != nil {
+		return
+	}
+
+	err = krakenResp.ExtractResult(&resp)
+	return
+}
+
+// Ticket returns ticker information from Kraken.
+// https://www.kraken.com/en-gb/help/api#get-ticker-info
+func (p *Market) Ticker(ctx context.Context, pairs ...string) (resp TickerResponse, err error) {
+	body := url.Values{
+		"pair": []string{strings.Join(pairs, ",")},
+	}
+
+	req, err := p.Client.Dial(ctx, http.MethodPost, TickerResource, body)
 	if err != nil {
 		return
 	}

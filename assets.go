@@ -1,12 +1,18 @@
 package gokraken
 
-const AssetsResource = "Assets" // The API resource for the Kraken API asset info.
+const (
+	AssetsResource                 = "Assets" // The API resource for the Kraken API asset info.
+	AssetInfo      AssetsInfoLevel = "info"   // Info level for assets.
+)
+
+// AssetsInfoLevel represents an info level for an assets request.
+type AssetsInfoLevel string
 
 // AssetsRequest represents a request to list asset information from Kraken.
 type AssetsRequest struct {
-	Info   string     // Info to retrieve (default: info).
-	AClass string     // Asset class (default: currency).
-	Asset  []Currency // Comma delimited list of assets.
+	Info   AssetsInfoLevel // Info to retrieve (default: info).
+	AClass string          // Asset class (default: currency).
+	Asset  []Currency      // List of assets.
 }
 
 // AssetsResponse represents an array of asset names and their info.
