@@ -8,6 +8,8 @@ import (
 	"net/url"
 )
 
+// Signature represents a cryptographic signature for signing private Kraken
+// API requests.
 type Signature struct {
 	APISecret []byte
 	Data      url.Values

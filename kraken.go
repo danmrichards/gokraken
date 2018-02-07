@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	// APIBaseUrl is the base URI of the Kraken API.
-	APIBaseUrl = "https://api.kraken.com"
+	// APIBaseURL is the base URI of the Kraken API.
+	APIBaseURL = "https://api.kraken.com"
 
 	// APIKeyHeader is the header to send the API key to Kraken in.
 	APIKeyHeader = "API-Key"
@@ -95,12 +95,12 @@ func (k *Kraken) initServices() {
 	k.UserData = &UserData{k}
 }
 
-// GetBaseUrl returns the base URI of the Kraken API.
-// If the BaseURL value is not set on the Kraken struct the constant APIBaseUrl
+// GetBaseURL returns the base URI of the Kraken API.
+// If the BaseURL value is not set on the Kraken struct the constant APIBaseURL
 // will be returned instead.
-func (k *Kraken) GetBaseUrl() string {
+func (k *Kraken) GetBaseURL() string {
 	if k.BaseURL == "" {
-		return APIBaseUrl
+		return APIBaseURL
 	}
 
 	return k.BaseURL
@@ -203,7 +203,7 @@ func (k *Kraken) ResourceURI(namespace, resource string) string {
 func (k *Kraken) ResourceURL(namespace, resource string) string {
 	return fmt.Sprintf(
 		"%s%s",
-		k.GetBaseUrl(),
+		k.GetBaseURL(),
 		k.ResourceURI(namespace, resource),
 	)
 }

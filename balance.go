@@ -1,6 +1,7 @@
 package gokraken
 
-const BalanceResource = "Balance" // The API resource for balance.
+// BalanceResource is the API resource for balance.
+const BalanceResource = "Balance"
 
 // BalanceResponse represents the response from the Balance endpoint of the
 // Kraken API.

@@ -1,6 +1,7 @@
 package gokraken
 
-const TimeResource = "Time" // The API resource for the Kraken API server time.
+// TimeResource is the API resource for the Kraken API server time.
+const TimeResource = "Time"
 
 // TimeResponse represents the response from the Time endpoint of the
 // Kraken API.

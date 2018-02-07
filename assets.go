@@ -1,8 +1,11 @@
 package gokraken
 
 const (
-	AssetsResource                 = "Assets" // The API resource for the Kraken API asset info.
-	AssetInfo      AssetsInfoLevel = "info"   // Info level for assets.
+	// AssetsResource is the API resource for the Kraken API asset info.
+	AssetsResource = "Assets"
+
+	// AssetInfo is the info level for assets.
+	AssetInfo AssetsInfoLevel = "info"
 )
 
 // AssetsInfoLevel represents an info level for an assets request.

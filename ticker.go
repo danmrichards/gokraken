@@ -1,6 +1,7 @@
 package gokraken
 
-const TickerResource = "Ticker" // The API resource for the Kraken API ticker.
+// TickerResource is the API resource for the Kraken API ticker.
+const TickerResource = "Ticker"
 
 // TickerResponse represents the response from the Ticker endpoint of the
 // Kraken API.

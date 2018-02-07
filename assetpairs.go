@@ -1,11 +1,20 @@
 package gokraken
 
 const (
-	AssetPairsResource                     = "AssetPairs" // The API resource for the Kraken API asset info.
-	AssetPairsInfo     AssetPairsInfoLevel = "info"       // Info level for asset pairs.
-	AssetPairsLeverage AssetPairsInfoLevel = "leverage"   // Leverage level for asset pairs.
-	AssetPairsFees     AssetPairsInfoLevel = "fees"       // Fees level for asset pairs.
-	AssetPairsMargin   AssetPairsInfoLevel = "margin"     // Margin level for asset pairs.
+	// AssetPairsResource is the API resource for the Kraken API asset info.
+	AssetPairsResource = "AssetPairs"
+
+	// AssetPairsInfo is the info level for asset pairs.
+	AssetPairsInfo AssetPairsInfoLevel = "info"
+
+	// AssetPairsLeverage is the leverage level for asset pairs.
+	AssetPairsLeverage AssetPairsInfoLevel = "leverage"
+
+	// AssetPairsFees is the fees level for asset pairs.
+	AssetPairsFees AssetPairsInfoLevel = "fees"
+
+	// AssetPairsMargin is the margin level for asset pairs.
+	AssetPairsMargin AssetPairsInfoLevel = "margin"
 )
 
 // AssetPairsInfoLevel represents an info level for an asset pairs request.

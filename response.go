@@ -11,12 +11,12 @@ type Response struct {
 // ExtractResult extracts the result from a Kraken API response into the
 // destination parameter.
 func (r *Response) ExtractResult(dst interface{}) error {
-	resultJson, err := json.Marshal(r.Result)
+	resultJSON, err := json.Marshal(r.Result)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(resultJson, &dst)
+	err = json.Unmarshal(resultJSON, &dst)
 	if err != nil {
 		return err
 	}

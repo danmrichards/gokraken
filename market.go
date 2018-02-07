@@ -111,7 +111,7 @@ func (p *Market) AssetPairs(ctx context.Context, assetPairReq *AssetPairsRequest
 	return
 }
 
-// Ticket returns ticker information from Kraken.
+// Ticker returns ticker information from Kraken.
 // https://www.kraken.com/en-gb/help/api#get-ticker-info
 func (p *Market) Ticker(ctx context.Context, pairs ...string) (resp TickerResponse, err error) {
 	body := url.Values{

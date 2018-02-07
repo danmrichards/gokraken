@@ -87,9 +87,9 @@ func TestKraken_GetBaseUrl(t *testing.T) {
 			k.BaseURL = c.baseURL
 
 			if c.baseURL != "" {
-				assert(c.baseURL, k.GetBaseUrl(), t)
+				assert(c.baseURL, k.GetBaseURL(), t)
 			} else {
-				assert(APIBaseUrl, k.GetBaseUrl(), t)
+				assert(APIBaseURL, k.GetBaseURL(), t)
 			}
 		})
 	}
