@@ -493,3 +493,57 @@ func TestMarket_Ticker(t *testing.T) {
 		})
 	}
 }
+
+func TestMarket_Ohlc(t *testing.T) {
+	cases := []struct {
+		name             string
+		request          *OhlcRequest
+		mockResponse     []byte
+		expectedResponse OhlcResponse
+	}{
+		{
+			name: "valid request",
+			request: &OhlcRequest{
+				Pair: "BCHEUR",
+			},
+			mockResponse: []byte(`{"error":[],"result":{"BCHEUR":[[1518774960,"1196.0","1196.0","1196.0","1196.0","0.0","0.00000000",0]],"last":1518818040}}`),
+			expectedResponse: OhlcResponse{
+				"BCHEUR": []OhlcData{
+					{
+						Time:   time.Unix(1518774960, 0),
+						Open:   "1196.0",
+						High:   "1196.0",
+						Low:    "1196.0",
+						Close:  "1196.0",
+						Vwap:   "0.0",
+						Volume: "0.00000000",
+						Count:  0,
+					},
+				},
+				"last": time.Unix(1518818040, 0),
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+
+				w.Write(c.mockResponse)
+			}))
+
+			defer ts.Close()
+
+			k := New()
+			k.BaseURL = ts.URL
+
+			res, err := k.Market.Ohlc(context.Background(), c.request)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			assert(c.expectedResponse, res, t)
+		})
+	}
+}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -15,13 +16,13 @@ type Market struct {
 
 // Time returns the current server time of Kraken.
 // https://www.kraken.com/help/api#get-server-time
-func (p *Market) Time(ctx context.Context) (resp *TimeResponse, err error) {
-	req, err := p.Client.Dial(ctx, http.MethodGet, TimeResource, nil)
+func (m *Market) Time(ctx context.Context) (resp *TimeResponse, err error) {
+	req, err := m.Client.Dial(ctx, http.MethodGet, TimeResource, nil)
 	if err != nil {
 		return
 	}
 
-	krakenResp, err := p.Client.Call(req)
+	krakenResp, err := m.Client.Call(req)
 	if err != nil {
 		return
 	}
@@ -32,7 +33,7 @@ func (p *Market) Time(ctx context.Context) (resp *TimeResponse, err error) {
 
 // Assets returns asset information from Kraken.
 // https://www.kraken.com/en-gb/help/api#get-asset-info
-func (p *Market) Assets(ctx context.Context, assetReq *AssetsRequest) (resp AssetsResponse, err error) {
+func (m *Market) Assets(ctx context.Context, assetReq *AssetsRequest) (resp AssetsResponse, err error) {
 	if assetReq == nil {
 		assetReq = &AssetsRequest{}
 	}
@@ -59,12 +60,12 @@ func (p *Market) Assets(ctx context.Context, assetReq *AssetsRequest) (resp Asse
 		body.Add("asset", strings.Join(assetStrings, ","))
 	}
 
-	req, err := p.Client.Dial(ctx, http.MethodPost, AssetsResource, body)
+	req, err := m.Client.Dial(ctx, http.MethodPost, AssetsResource, body)
 	if err != nil {
 		return
 	}
 
-	krakenResp, err := p.Client.Call(req)
+	krakenResp, err := m.Client.Call(req)
 	if err != nil {
 		return
 	}
@@ -75,7 +76,7 @@ func (p *Market) Assets(ctx context.Context, assetReq *AssetsRequest) (resp Asse
 
 // AssetPairs returns tradable asset pairs from Kraken.
 // https://www.kraken.com/en-gb/help/api#get-tradable-pairs
-func (p *Market) AssetPairs(ctx context.Context, assetPairReq *AssetPairsRequest) (resp AssetPairsResponse, err error) {
+func (m *Market) AssetPairs(ctx context.Context, assetPairReq *AssetPairsRequest) (resp AssetPairsResponse, err error) {
 	if assetPairReq == nil {
 		assetPairReq = &AssetPairsRequest{}
 	}
@@ -97,12 +98,12 @@ func (p *Market) AssetPairs(ctx context.Context, assetPairReq *AssetPairsRequest
 		body.Add("pair", strings.Join(pairStrings, ","))
 	}
 
-	req, err := p.Client.Dial(ctx, http.MethodPost, AssetPairsResource, body)
+	req, err := m.Client.Dial(ctx, http.MethodPost, AssetPairsResource, body)
 	if err != nil {
 		return
 	}
 
-	krakenResp, err := p.Client.Call(req)
+	krakenResp, err := m.Client.Call(req)
 	if err != nil {
 		return
 	}
@@ -113,17 +114,47 @@ func (p *Market) AssetPairs(ctx context.Context, assetPairReq *AssetPairsRequest
 
 // Ticker returns ticker information from Kraken.
 // https://www.kraken.com/en-gb/help/api#get-ticker-info
-func (p *Market) Ticker(ctx context.Context, pairs ...string) (resp TickerResponse, err error) {
+func (m *Market) Ticker(ctx context.Context, pairs ...string) (resp TickerResponse, err error) {
 	body := url.Values{
 		"pair": []string{strings.Join(pairs, ",")},
 	}
 
-	req, err := p.Client.Dial(ctx, http.MethodPost, TickerResource, body)
+	req, err := m.Client.Dial(ctx, http.MethodPost, TickerResource, body)
 	if err != nil {
 		return
 	}
 
-	krakenResp, err := p.Client.Call(req)
+	krakenResp, err := m.Client.Call(req)
+	if err != nil {
+		return
+	}
+
+	err = krakenResp.ExtractResult(&resp)
+	return
+}
+
+// Ohlc returns holc information from Kraken.
+// https://www.kraken.com/en-gb/help/api#get-ohlc-data
+func (m *Market) Ohlc(ctx context.Context, ohlcReq *OhlcRequest) (resp OhlcResponse, err error) {
+	if ohlcReq.Interval == 0 {
+		ohlcReq.Interval = 1
+	}
+
+	body := url.Values{
+		"pair":     []string{ohlcReq.Pair},
+		"interval": []string{strconv.Itoa(ohlcReq.Interval)},
+	}
+
+	if ohlcReq.Since != 0 {
+		body["since"] = []string{strconv.FormatInt(ohlcReq.Since, 10)}
+	}
+
+	req, err := m.Client.Dial(ctx, http.MethodPost, OhlcResource, body)
+	if err != nil {
+		return
+	}
+
+	krakenResp, err := m.Client.Call(req)
 	if err != nil {
 		return
 	}
