@@ -687,3 +687,50 @@ func TestMarket_Trades(t *testing.T) {
 		})
 	}
 }
+
+func TestMarket_Spread(t *testing.T) {
+	cases := []struct {
+		name             string
+		request          *SpreadRequest
+		mockResponse     []byte
+		expectedResponse *SpreadResponse
+	}{
+		{
+			name:         "valid request",
+			request:      &SpreadRequest{Pair: "BCHEUR"},
+			mockResponse: []byte(`{"error":[],"result":{"BCHEUR":[[1518904771,"1225.600000","1229.200000"]],"last":1518905570}}`),
+			expectedResponse: &SpreadResponse{
+				Data: []SpreadData{
+					{
+						Timestamp: time.Unix(1518904771, 0),
+						Bid:       1225.6,
+						Ask:       1229.2,
+					},
+				},
+				Last: 1518905570,
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+
+				w.Write(c.mockResponse)
+			}))
+
+			defer ts.Close()
+
+			k := New()
+			k.BaseURL = ts.URL
+
+			res, err := k.Market.Spread(context.Background(), &SpreadRequest{Pair: "BCHEUR"})
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			assert(c.expectedResponse, res, t)
+		})
+	}
+}

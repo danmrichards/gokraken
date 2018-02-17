@@ -391,3 +391,97 @@ func (m *Market) Trades(ctx context.Context, tradeReq *TradesRequest) (res *Trad
 
 	return
 }
+
+// Spread returns the spread data from Kraken.
+// https://www.kraken.com/en-gb/help/api#get-recent-spread-data
+func (m *Market) Spread(ctx context.Context, spreadReq *SpreadRequest) (res *SpreadResponse, err error) {
+	body := url.Values{
+		"pair": []string{spreadReq.Pair},
+	}
+
+	if spreadReq.Since != 0 {
+		body["since"] = []string{strconv.FormatInt(spreadReq.Since, 10)}
+	}
+
+	req, err := m.Client.Dial(ctx, http.MethodPost, SpreadResource, body)
+	if err != nil {
+		return
+	}
+
+	krakenResp, err := m.Client.Call(req)
+	if err != nil {
+		return
+	}
+
+	var tmp map[string]interface{}
+	err = krakenResp.ExtractResult(&tmp)
+	if err != nil {
+		return
+	}
+
+	lastFloat, ok := tmp["last"].(float64)
+	if !ok {
+		err = errors.New("could not extract last from ohlc response")
+		return
+	}
+
+	res = &SpreadResponse{
+		Last: int64(lastFloat),
+		Data: make([]SpreadData, 0),
+	}
+
+	spreadData, ok := tmp[spreadReq.Pair].([]interface{})
+	if !ok {
+		err = fmt.Errorf("could not extract spread data where pair=%s", spreadReq.Pair)
+		return
+	}
+
+	for key, spreadDatum := range spreadData {
+		spreadDatum, ok := spreadDatum.([]interface{})
+		if !ok {
+			err = fmt.Errorf("could not extract at spreadDatum=%d", key)
+			return
+		}
+
+		timestampFloat, ok := spreadDatum[0].(float64)
+		if !ok {
+			err = fmt.Errorf("could not extract timestamp at spreadDatum=%d", key)
+			return
+		}
+		timestamp := time.Unix(int64(timestampFloat), 0)
+
+		bidStr, ok := spreadDatum[1].(string)
+		if !ok {
+			err = fmt.Errorf("could not extract bid at spreadDatum=%d", key)
+			return
+		}
+
+		var bid float64
+		bid, err = strconv.ParseFloat(bidStr, 64)
+		if err != nil {
+			err = fmt.Errorf("could not parse bid to float at spreadDatum=%d", key)
+			return
+		}
+
+		askStr, ok := spreadDatum[2].(string)
+		if !ok {
+			err = fmt.Errorf("could not extract ask at spreadDatum=%d", key)
+			return
+		}
+
+		var ask float64
+		ask, err = strconv.ParseFloat(askStr, 64)
+		if err != nil {
+			err = fmt.Errorf("could not parse ask to float at spreadDatum=%d", key)
+			return
+		}
+
+		res.Data = append(res.Data, SpreadData{
+			Timestamp: timestamp,
+			Bid:       bid,
+			Ask:       ask,
+		})
+	}
+
+	return
+}

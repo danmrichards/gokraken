@@ -15,7 +15,7 @@ type DepthRequest struct {
 	Count int
 }
 
-// TradesResponse represents the response from the Kraken order book endpoint.
+// DepthResponse represents the response from the Kraken order book endpoint.
 type DepthResponse map[string]Depth
 
 // Depth is an order book response for a given asset pair.
