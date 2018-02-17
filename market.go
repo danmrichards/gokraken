@@ -33,7 +33,7 @@ func (m *Market) Time(ctx context.Context) (resp *TimeResponse, err error) {
 
 // Assets returns asset information from Kraken.
 // https://www.kraken.com/en-gb/help/api#get-asset-info
-func (m *Market) Assets(ctx context.Context, assetReq *AssetsRequest) (resp AssetsResponse, err error) {
+func (m *Market) Assets(ctx context.Context, assetReq *AssetsRequest) (resp *AssetsResponse, err error) {
 	if assetReq == nil {
 		assetReq = &AssetsRequest{}
 	}
@@ -76,7 +76,7 @@ func (m *Market) Assets(ctx context.Context, assetReq *AssetsRequest) (resp Asse
 
 // AssetPairs returns tradable asset pairs from Kraken.
 // https://www.kraken.com/en-gb/help/api#get-tradable-pairs
-func (m *Market) AssetPairs(ctx context.Context, assetPairReq *AssetPairsRequest) (resp AssetPairsResponse, err error) {
+func (m *Market) AssetPairs(ctx context.Context, assetPairReq *AssetPairsRequest) (resp *AssetPairsResponse, err error) {
 	if assetPairReq == nil {
 		assetPairReq = &AssetPairsRequest{}
 	}
@@ -114,7 +114,7 @@ func (m *Market) AssetPairs(ctx context.Context, assetPairReq *AssetPairsRequest
 
 // Ticker returns ticker information from Kraken.
 // https://www.kraken.com/en-gb/help/api#get-ticker-info
-func (m *Market) Ticker(ctx context.Context, pairs ...string) (resp TickerResponse, err error) {
+func (m *Market) Ticker(ctx context.Context, pairs ...string) (resp *TickerResponse, err error) {
 	body := url.Values{
 		"pair": []string{strings.Join(pairs, ",")},
 	}
@@ -133,9 +133,9 @@ func (m *Market) Ticker(ctx context.Context, pairs ...string) (resp TickerRespon
 	return
 }
 
-// Ohlc returns holc information from Kraken.
+// Ohlc returns ohlc information from Kraken.
 // https://www.kraken.com/en-gb/help/api#get-ohlc-data
-func (m *Market) Ohlc(ctx context.Context, ohlcReq *OhlcRequest) (resp OhlcResponse, err error) {
+func (m *Market) Ohlc(ctx context.Context, ohlcReq *OhlcRequest) (resp *OhlcResponse, err error) {
 	if ohlcReq.Interval == 0 {
 		ohlcReq.Interval = 1
 	}
@@ -150,6 +150,28 @@ func (m *Market) Ohlc(ctx context.Context, ohlcReq *OhlcRequest) (resp OhlcRespo
 	}
 
 	req, err := m.Client.Dial(ctx, http.MethodPost, OhlcResource, body)
+	if err != nil {
+		return
+	}
+
+	krakenResp, err := m.Client.Call(req)
+	if err != nil {
+		return
+	}
+
+	err = krakenResp.ExtractResult(&resp)
+	return
+}
+
+// Depth returns the order book from Kraken.
+// https://www.kraken.com/en-gb/help/api#get-order-book
+func (m *Market) Depth(ctx context.Context, depthReq *DepthRequest) (resp *DepthResponse, err error) {
+	body := url.Values{
+		"pair":  []string{depthReq.Pair},
+		"count": []string{strconv.Itoa(depthReq.Count)},
+	}
+
+	req, err := m.Client.Dial(ctx, http.MethodPost, DepthResource, body)
 	if err != nil {
 		return
 	}

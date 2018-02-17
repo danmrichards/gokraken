@@ -16,7 +16,7 @@ func TestUserData_Balance(t *testing.T) {
 		},
 	}
 
-	expectedResult := BalanceResponse{
+	expectedResult := &BalanceResponse{
 		BCH:  1.23,
 		DASH: 2.34,
 	}

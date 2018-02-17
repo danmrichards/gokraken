@@ -47,7 +47,7 @@ func TestMarket_Assets(t *testing.T) {
 	cases := []struct {
 		name             string
 		assetRequest     *AssetsRequest
-		expectedResponse AssetsResponse
+		expectedResponse *AssetsResponse
 		mockResponse     Response
 	}{
 		{
@@ -74,7 +74,7 @@ func TestMarket_Assets(t *testing.T) {
 					},
 				},
 			},
-			expectedResponse: AssetsResponse{
+			expectedResponse: &AssetsResponse{
 				BCH: &Asset{
 					AltName:         string(BCH),
 					AClass:          "currency",
@@ -119,7 +119,7 @@ func TestMarket_Assets(t *testing.T) {
 					DASH,
 				},
 			},
-			expectedResponse: AssetsResponse{
+			expectedResponse: &AssetsResponse{
 				BCH: &Asset{
 					AltName:         string(BCH),
 					AClass:          "currency",
@@ -165,12 +165,12 @@ func TestMarket_AssetPairs(t *testing.T) {
 		name             string
 		infoLevel        AssetPairsInfoLevel
 		pairs            []string
-		expectedResponse AssetPairsResponse
+		expectedResponse *AssetPairsResponse
 		mockResponse     Response
 	}{
 		{
 			name: "no request",
-			expectedResponse: AssetPairsResponse{
+			expectedResponse: &AssetPairsResponse{
 				"BCHEUR": &AssetPair{
 					Altname:    "BCHEUR",
 					AclassBase: "currency",
@@ -200,7 +200,7 @@ func TestMarket_AssetPairs(t *testing.T) {
 		{
 			name:      "leverage request",
 			infoLevel: AssetPairsLeverage,
-			expectedResponse: AssetPairsResponse{
+			expectedResponse: &AssetPairsResponse{
 				"BCHEUR": &AssetPair{
 					LeverageBuy:  []float64{1.23},
 					LeverageSell: []float64{2.34},
@@ -218,7 +218,7 @@ func TestMarket_AssetPairs(t *testing.T) {
 		{
 			name:      "fees request",
 			infoLevel: AssetPairsFees,
-			expectedResponse: AssetPairsResponse{
+			expectedResponse: &AssetPairsResponse{
 				"BCHEUR": &AssetPair{
 					Fees: [][]float64{
 						{1.23, 2.34},
@@ -238,7 +238,7 @@ func TestMarket_AssetPairs(t *testing.T) {
 		{
 			name:      "margin request",
 			infoLevel: AssetPairsMargin,
-			expectedResponse: AssetPairsResponse{
+			expectedResponse: &AssetPairsResponse{
 				"BCHEUR": &AssetPair{
 					MarginCall: 10,
 					MarginStop: 20,
@@ -256,7 +256,7 @@ func TestMarket_AssetPairs(t *testing.T) {
 		{
 			name:  "pair filtered request",
 			pairs: []string{"BCHUSD"},
-			expectedResponse: AssetPairsResponse{
+			expectedResponse: &AssetPairsResponse{
 				"BCHUSD": &AssetPair{
 					MarginCall: 10,
 					MarginStop: 20,
@@ -305,7 +305,7 @@ func TestMarket_Ticker(t *testing.T) {
 		name             string
 		pairs            []string
 		mockResponse     Response
-		expectedResponse TickerResponse
+		expectedResponse *TickerResponse
 	}{
 		{
 			name:  "valid request",
@@ -388,7 +388,7 @@ func TestMarket_Ticker(t *testing.T) {
 					},
 				},
 			},
-			expectedResponse: TickerResponse{
+			expectedResponse: &TickerResponse{
 				"BCHEUR": {
 					A: []string{
 						"804.900000",
@@ -499,7 +499,7 @@ func TestMarket_Ohlc(t *testing.T) {
 		name             string
 		request          *OhlcRequest
 		mockResponse     []byte
-		expectedResponse OhlcResponse
+		expectedResponse *OhlcResponse
 	}{
 		{
 			name: "valid request",
@@ -507,16 +507,16 @@ func TestMarket_Ohlc(t *testing.T) {
 				Pair: "BCHEUR",
 			},
 			mockResponse: []byte(`{"error":[],"result":{"BCHEUR":[[1518774960,"1196.0","1196.0","1196.0","1196.0","0.0","0.00000000",0]],"last":1518818040}}`),
-			expectedResponse: OhlcResponse{
+			expectedResponse: &OhlcResponse{
 				"BCHEUR": []OhlcData{
 					{
 						Time:   time.Unix(1518774960, 0),
-						Open:   "1196.0",
-						High:   "1196.0",
-						Low:    "1196.0",
-						Close:  "1196.0",
-						Vwap:   "0.0",
-						Volume: "0.00000000",
+						Open:   1196.0,
+						High:   1196.0,
+						Low:    1196.0,
+						Close:  1196.0,
+						Vwap:   0.0,
+						Volume: 0.00000000,
 						Count:  0,
 					},
 				},
@@ -539,6 +539,94 @@ func TestMarket_Ohlc(t *testing.T) {
 			k.BaseURL = ts.URL
 
 			res, err := k.Market.Ohlc(context.Background(), c.request)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			assert(c.expectedResponse, res, t)
+		})
+	}
+}
+
+func TestMarket_Depth(t *testing.T) {
+	cases := []struct {
+		name             string
+		request          *DepthRequest
+		mockResponse     []byte
+		expectedResponse *DepthResponse
+	}{
+		{
+			name:         "valid request",
+			request:      &DepthRequest{Pair: "BCHEUR"},
+			mockResponse: []byte(`{"error":[],"result":{"BCHEUR":{"asks":[["1225.000000","3.729",1518899703]],"bids":[["1222.600000","0.664",1518899718]]}}}`),
+			expectedResponse: &DepthResponse{
+				"BCHEUR": Depth{
+					Asks: []DepthItem{
+						{
+							Price:     1225.000000,
+							Volume:    3.729,
+							Timestamp: time.Unix(1518899703, 0),
+						},
+					},
+					Bids: []DepthItem{
+						{
+							Price:     1222.600000,
+							Volume:    0.664,
+							Timestamp: time.Unix(1518899718, 0),
+						},
+					},
+				},
+			},
+		},
+		{
+			name:         "count request",
+			request:      &DepthRequest{Pair: "BCHEUR", Count: 1},
+			mockResponse: []byte(`{"error":[],"result":{"BCHEUR":{"asks":[["1230.100000","14.673",1518900219],["1231.300000","0.112",1518900211]],"bids":[["1230.000000","0.486",1518900183],["1229.800000","0.108",1518900204]]}}}`),
+			expectedResponse: &DepthResponse{
+				"BCHEUR": Depth{
+					Asks: []DepthItem{
+						{
+							Price:     1230.100000,
+							Volume:    14.673,
+							Timestamp: time.Unix(1518900219, 0),
+						},
+						{
+							Price:     1231.300000,
+							Volume:    0.112,
+							Timestamp: time.Unix(1518900211, 0),
+						},
+					},
+					Bids: []DepthItem{
+						{
+							Price:     1230.000000,
+							Volume:    0.486,
+							Timestamp: time.Unix(1518900183, 0),
+						},
+						{
+							Price:     1229.800000,
+							Volume:    0.108,
+							Timestamp: time.Unix(1518900204, 0),
+						},
+					},
+				},
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+
+				w.Write(c.mockResponse)
+			}))
+
+			defer ts.Close()
+
+			k := New()
+			k.BaseURL = ts.URL
+
+			res, err := k.Market.Depth(context.Background(), c.request)
 			if err != nil {
 				t.Fatal(err)
 			}
