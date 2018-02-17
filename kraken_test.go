@@ -121,12 +121,12 @@ func TestKraken_PrepareRequest(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	resp, err := k.Call(req)
+	res, err := k.Call(req)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assert(&exampleResp, resp, t)
+	assert(&exampleResp, res, t)
 }
 
 func TestKraken_Dial(t *testing.T) {

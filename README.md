@@ -19,13 +19,13 @@ import (
 func main() {
 	kraken := gokraken.New()
 	
-	resp, err := kraken.Market.Time(context.Background())
+	res, err := kraken.Market.Time(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
 	
-	fmt.Printf("server unix time: %d\n", resp.UnixTime)
-	fmt.Printf("service rfc1123 time: %s\n", resp.Rfc1123)
+	fmt.Printf("server unix time: %d\n", res.UnixTime)
+	fmt.Printf("service rfc1123 time: %s\n", res.Rfc1123)
 }
 ```
 
@@ -44,12 +44,12 @@ import (
 func main() {
 	kraken := gokraken.NewWithAuth("API_KEY", "PRIVATE_KEY")
 	
-	resp, err := kraken.UserData.Balance(context.Background())
+	res, err := kraken.UserData.Balance(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
 	
-	for currency, balance := range resp {
+	for currency, balance := range *res {
 	    fmt.Printf("%s: %f'n", currency, balance)
 	}
 }

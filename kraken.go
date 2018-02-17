@@ -107,13 +107,13 @@ func (k *Kraken) GetBaseURL() string {
 }
 
 // Call performs a request against the Kraken API.
-func (k *Kraken) Call(req *http.Request) (resp *Response, err error) {
+func (k *Kraken) Call(req *http.Request) (res *Response, err error) {
 	apiResp, err := k.HTTPClient.Do(req)
 	if err != nil {
 		return
 	}
 
-	err = bindJSON(apiResp.Body, &resp)
+	err = bindJSON(apiResp.Body, &res)
 	if err != nil {
 		return
 	}

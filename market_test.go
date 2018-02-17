@@ -35,12 +35,12 @@ func TestMarket_Time(t *testing.T) {
 	k := New()
 	k.BaseURL = ts.URL
 
-	resp, err := k.Market.Time(context.Background())
+	res, err := k.Market.Time(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assert(expectedResult, resp, t)
+	assert(expectedResult, res, t)
 }
 
 func TestMarket_Assets(t *testing.T) {
@@ -150,12 +150,12 @@ func TestMarket_Assets(t *testing.T) {
 			k := New()
 			k.BaseURL = ts.URL
 
-			resp, err := k.Market.Assets(context.Background(), c.assetRequest)
+			res, err := k.Market.Assets(context.Background(), c.assetRequest)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			assert(c.expectedResponse, resp, t)
+			assert(c.expectedResponse, res, t)
 		})
 	}
 }
@@ -287,7 +287,7 @@ func TestMarket_AssetPairs(t *testing.T) {
 			k := New()
 			k.BaseURL = ts.URL
 
-			resp, err := k.Market.AssetPairs(context.Background(), &AssetPairsRequest{
+			res, err := k.Market.AssetPairs(context.Background(), &AssetPairsRequest{
 				Info:  c.infoLevel,
 				Pairs: c.pairs,
 			})
@@ -295,7 +295,7 @@ func TestMarket_AssetPairs(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			assert(c.expectedResponse, resp, t)
+			assert(c.expectedResponse, res, t)
 		})
 	}
 }
@@ -484,12 +484,12 @@ func TestMarket_Ticker(t *testing.T) {
 			k := New()
 			k.BaseURL = ts.URL
 
-			resp, err := k.Market.Ticker(context.Background(), c.pairs...)
+			res, err := k.Market.Ticker(context.Background(), c.pairs...)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			assert(c.expectedResponse, resp, t)
+			assert(c.expectedResponse, res, t)
 		})
 	}
 }
@@ -508,19 +508,19 @@ func TestMarket_Ohlc(t *testing.T) {
 			},
 			mockResponse: []byte(`{"error":[],"result":{"BCHEUR":[[1518774960,"1196.0","1196.0","1196.0","1196.0","0.0","0.00000000",0]],"last":1518818040}}`),
 			expectedResponse: &OhlcResponse{
-				"BCHEUR": []OhlcData{
+				Data: []OhlcData{
 					{
-						Time:   time.Unix(1518774960, 0),
-						Open:   1196.0,
-						High:   1196.0,
-						Low:    1196.0,
-						Close:  1196.0,
-						Vwap:   0.0,
-						Volume: 0.00000000,
-						Count:  0,
+						Timestamp: time.Unix(1518774960, 0),
+						Open:      1196.0,
+						High:      1196.0,
+						Low:       1196.0,
+						Close:     1196.0,
+						Vwap:      0.0,
+						Volume:    0.00000000,
+						Count:     0,
 					},
 				},
-				"last": time.Unix(1518818040, 0),
+				Last: 1518818040,
 			},
 		},
 	}
@@ -627,6 +627,58 @@ func TestMarket_Depth(t *testing.T) {
 			k.BaseURL = ts.URL
 
 			res, err := k.Market.Depth(context.Background(), c.request)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			assert(c.expectedResponse, res, t)
+		})
+	}
+}
+
+func TestMarket_Trades(t *testing.T) {
+	cases := []struct {
+		name             string
+		request          *TradesRequest
+		mockResponse     []byte
+		expectedResponse *TradesResponse
+	}{
+		{
+			name: "valid request",
+			request: &TradesRequest{
+				Pair: "BCHEUR",
+			},
+			mockResponse: []byte(`{"error":[],"result":{"BCHEUR":[["700000.000000","0.00050000",1501603433.7669,"s","l",""]],"last":"1501605300157840478"}}`),
+			expectedResponse: &TradesResponse{
+				Trades: []Trade{
+					{
+						Price:         700000,
+						Volume:        0.00050000,
+						Timestamp:     time.Unix(1501603433, 0),
+						BuySell:       TradeSell,
+						MarketLimit:   TradeLimit,
+						Miscellaneous: "",
+					},
+				},
+				Last: 1501605300157840478,
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+
+				w.Write(c.mockResponse)
+			}))
+
+			defer ts.Close()
+
+			k := New()
+			k.BaseURL = ts.URL
+
+			res, err := k.Market.Trades(context.Background(), c.request)
 			if err != nil {
 				t.Fatal(err)
 			}

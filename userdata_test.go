@@ -34,10 +34,10 @@ func TestUserData_Balance(t *testing.T) {
 	k := NewWithAuth("api_key", "cHJpdmF0ZV9rZXk=")
 	k.BaseURL = ts.URL
 
-	resp, err := k.UserData.Balance(context.Background())
+	res, err := k.UserData.Balance(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assert(expectedResult, resp, t)
+	assert(expectedResult, res, t)
 }
