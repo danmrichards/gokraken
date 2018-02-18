@@ -4,9 +4,9 @@ package asset
 
 import "fmt"
 
-const _Currency_name = "EOSXXBTXXRPGNOXICNXMLNZJPYXZECZCADZGBPXETCXLTCXNMCXXLMUSDTXREPZEURBCHDASHZUSDZKRWXXDGXXMRKFEEXDAOXETHXXVN"
+const _Currency_name = "XICNXXDGXZECZCADDASHXDAOZGBPZJPYZKRWBCHKFEEXXMRXXRPZEURZUSDUSDTXLTCXMLNXXVNXETCXETHXNMCXXBTXXLMEOSGNOXREP"
 
-var _Currency_index = [...]uint8{0, 3, 7, 11, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62, 66, 69, 73, 77, 81, 85, 89, 93, 97, 101, 105}
+var _Currency_index = [...]uint8{0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 39, 43, 47, 51, 55, 59, 63, 67, 71, 75, 79, 83, 87, 91, 95, 98, 101, 105}
 
 func (i Currency) String() string {
 	if i < 0 || i >= Currency(len(_Currency_index)-1) {
