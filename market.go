@@ -451,7 +451,7 @@ func (m *Market) Spread(ctx context.Context, spreadReq SpreadRequest) (res *Spre
 
 	lastFloat, ok := tmp["last"].(float64)
 	if !ok {
-		err = errors.New("could not extract last from ohlc response")
+		err = errors.New("could not extract last from spread response")
 		return
 	}
 
