@@ -2,5 +2,5 @@ build:
 	go run cmd/main.go
 	go generate .
 
-	cp cmd/validation.html validation.go
+	cp cmd/validation.tpl validation.go
 	gofmt -w validation.go

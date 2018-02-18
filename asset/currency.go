@@ -5,63 +5,63 @@ package asset
 // DO NOT EDIT
 
 const (
-	XICN Currency = iota
-	XXDG
-	XZEC
-	ZCAD
-	DASH
+	KFEE Currency = iota
 	XDAO
-	ZGBP
-	ZJPY
-	ZKRW
-	BCH
-	KFEE
-	XXMR
-	XXRP
-	ZEUR
-	ZUSD
-	USDT
-	XLTC
-	XMLN
-	XXVN
-	XETC
-	XETH
 	XNMC
+	XXDG
+	DASH
+	EOS
 	XXBT
 	XXLM
-	EOS
-	GNO
 	XREP
+	BCH
+	ZJPY
+	XXMR
+	ZCAD
+	ZGBP
+	XETH
+	XMLN
+	GNO
+	XICN
+	XLTC
+	ZUSD
+	USDT
+	XETC
+	XXRP
+	XXVN
+	XZEC
+	ZEUR
+	ZKRW
 )
 
 type Currency int
 
 var validCurrencies = []Currency{
-	XICN,
-	XXDG,
-	XZEC,
-	ZCAD,
-	DASH,
-	XDAO,
-	ZGBP,
-	ZJPY,
-	ZKRW,
-	BCH,
 	KFEE,
-	XXMR,
-	XXRP,
-	ZEUR,
-	ZUSD,
-	USDT,
-	XLTC,
-	XMLN,
-	XXVN,
-	XETC,
-	XETH,
+	XDAO,
 	XNMC,
+	XXDG,
+	DASH,
+	EOS,
 	XXBT,
 	XXLM,
-	EOS,
-	GNO,
 	XREP,
+	BCH,
+	ZJPY,
+	XXMR,
+	ZCAD,
+	ZGBP,
+	XETH,
+	XMLN,
+	GNO,
+	XICN,
+	XLTC,
+	ZUSD,
+	USDT,
+	XETC,
+	XXRP,
+	XXVN,
+	XZEC,
+	ZEUR,
+	ZKRW,
 }

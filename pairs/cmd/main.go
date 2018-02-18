@@ -5,17 +5,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"go/format"
-	"html/template"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+	"text/template"
 )
 
 const (
-	templateFile = "cmd/assetpair.html"
+	templateFile = "cmd/assetpair.tpl"
 	outputFile   = "assetpair.go"
 
 	krakenAssetPairsURL = "https://api.kraken.com/0/public/AssetPairs"

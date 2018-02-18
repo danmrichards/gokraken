@@ -5,16 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"go/format"
-	"html/template"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"text/template"
 )
 
 const (
-	templateFile = "cmd/currency.html"
+	templateFile = "cmd/currency.tpl"
 	outputFile   = "currency.go"
 
 	krakenAssetsURL = "https://api.kraken.com/0/public/Assets"
@@ -69,7 +69,7 @@ func generateAssetPackage(assets assetsResponse) error {
 		return fmt.Errorf("cannot open template file: %v", err)
 	}
 
-	t := template.Must(template.New("asset").Parse(string(tpl)))
+	t := template.Must(template.New("currency").Parse(string(tpl)))
 	buf := new(bytes.Buffer)
 	err = t.Execute(buf, assetCodes)
 	if err != nil {
