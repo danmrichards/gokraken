@@ -47,7 +47,7 @@ func main() {
 		log.Fatal(err)
 	}
 	
-	for currency, balance := range *res {
+	for currency, balance := range res {
 	    fmt.Printf("%s: %f'n", currency, balance)
 	}
 }
