@@ -1,13 +1,17 @@
 package gokraken
 
-import "time"
+import (
+	"time"
+
+	"github.com/danmrichards/gokraken/pairs"
+)
 
 // OhlcResource is the API resource for the Kraken API ohlc.
 const OhlcResource = "OHLC"
 
 // OhlcRequest represents a request to list OHLC information from Kraken.
 type OhlcRequest struct {
-	Pair     string
+	Pair     pairs.AssetPair
 	Interval int
 	Since    int64
 }

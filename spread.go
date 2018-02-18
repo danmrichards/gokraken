@@ -1,13 +1,17 @@
 package gokraken
 
-import "time"
+import (
+	"time"
+
+	"github.com/danmrichards/gokraken/pairs"
+)
 
 // SpreadResource is the API resource for the Kraken API spread data.
 const SpreadResource = "Spread"
 
 // SpreadRequest represents a request to get spread data from Kraken.
 type SpreadRequest struct {
-	Pair  string
+	Pair  pairs.AssetPair
 	Since int64
 }
 

@@ -7,6 +7,9 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/danmrichards/gokraken/asset"
+	"github.com/danmrichards/gokraken/pairs"
 )
 
 func TestMarket_Time(t *testing.T) {
@@ -46,89 +49,41 @@ func TestMarket_Time(t *testing.T) {
 func TestMarket_Assets(t *testing.T) {
 	cases := []struct {
 		name             string
-		assetRequest     *AssetsRequest
-		expectedResponse *AssetsResponse
-		mockResponse     Response
+		info             AssetsInfoLevel
+		aClass           AssetsClass
+		asset            []asset.Currency
+		mockResponse     []byte
+		expectedResponse AssetsResponse
 	}{
 		{
-			name: "no request",
-			mockResponse: Response{
-				Result: map[Currency]*Asset{
-					BCH: {
-						AltName:         string(BCH),
-						AClass:          "currency",
-						Decimals:        10,
-						DisplayDecimals: 5,
-					},
-					DASH: {
-						AltName:         string(DASH),
-						AClass:          "currency",
-						Decimals:        10,
-						DisplayDecimals: 5,
-					},
-					EOS: {
-						AltName:         string(EOS),
-						AClass:          "currency",
-						Decimals:        10,
-						DisplayDecimals: 5,
-					},
-				},
-			},
-			expectedResponse: &AssetsResponse{
-				BCH: &Asset{
-					AltName:         string(BCH),
-					AClass:          "currency",
+			name:         "valid request",
+			info:         AssetInfo,
+			aClass:       AssetCurrency,
+			mockResponse: []byte(`{"error":[],"result":{"BCH":{"aclass":"currency","altname":"BCH","decimals":10,"display_decimals":5},"DASH":{"aclass":"currency","altname":"DASH","decimals":10,"display_decimals":5}}}`),
+			expectedResponse: AssetsResponse{
+				asset.BCH: Asset{
+					AClass:          AssetCurrency,
+					AltName:         "BCH",
 					Decimals:        10,
 					DisplayDecimals: 5,
 				},
-				DASH: &Asset{
-					AltName:         string(DASH),
-					AClass:          "currency",
-					Decimals:        10,
-					DisplayDecimals: 5,
-				},
-				EOS: &Asset{
-					AltName:         string(EOS),
-					AClass:          "currency",
+				asset.DASH: Asset{
+					AClass:          AssetCurrency,
+					AltName:         "DASH",
 					Decimals:        10,
 					DisplayDecimals: 5,
 				},
 			},
 		},
 		{
-			name: "filtered request",
-			mockResponse: Response{
-				Result: map[Currency]*Asset{
-					BCH: {
-						AltName:         string(BCH),
-						AClass:          "currency",
-						Decimals:        10,
-						DisplayDecimals: 5,
-					},
-					DASH: {
-						AltName:         string(DASH),
-						AClass:          "currency",
-						Decimals:        10,
-						DisplayDecimals: 5,
-					},
-				},
-			},
-			assetRequest: &AssetsRequest{
-				Asset: []Currency{
-					BCH,
-					DASH,
-				},
-			},
-			expectedResponse: &AssetsResponse{
-				BCH: &Asset{
-					AltName:         string(BCH),
-					AClass:          "currency",
-					Decimals:        10,
-					DisplayDecimals: 5,
-				},
-				DASH: &Asset{
-					AltName:         string(DASH),
-					AClass:          "currency",
+			name:         "filtered request",
+			info:         AssetInfo,
+			aClass:       AssetCurrency,
+			mockResponse: []byte(`{"error":[],"result":{"BCH":{"aclass":"currency","altname":"BCH","decimals":10,"display_decimals":5}}}`),
+			expectedResponse: AssetsResponse{
+				asset.BCH: Asset{
+					AClass:          AssetCurrency,
+					AltName:         "BCH",
 					Decimals:        10,
 					DisplayDecimals: 5,
 				},
@@ -141,8 +96,7 @@ func TestMarket_Assets(t *testing.T) {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
 
-				response, _ := json.Marshal(c.mockResponse)
-				w.Write(response)
+				w.Write(c.mockResponse)
 			}))
 
 			defer ts.Close()
@@ -150,7 +104,7 @@ func TestMarket_Assets(t *testing.T) {
 			k := New()
 			k.BaseURL = ts.URL
 
-			res, err := k.Market.Assets(context.Background(), c.assetRequest)
+			res, err := k.Market.Assets(context.Background(), c.info, c.aClass, c.asset...)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -164,112 +118,75 @@ func TestMarket_AssetPairs(t *testing.T) {
 	cases := []struct {
 		name             string
 		infoLevel        AssetPairsInfoLevel
-		pairs            []string
-		expectedResponse *AssetPairsResponse
-		mockResponse     Response
+		pairs            []pairs.AssetPair
+		expectedResponse AssetPairsResponse
+		mockResponse     []byte
 	}{
 		{
 			name: "no request",
-			expectedResponse: &AssetPairsResponse{
-				"BCHEUR": &AssetPair{
+			expectedResponse: AssetPairsResponse{
+				pairs.BCHEUR: AssetPairData{
 					Altname:    "BCHEUR",
-					AclassBase: "currency",
+					AclassBase: "asset",
 					Base:       "BCH",
 				},
-				"BCHUSD": &AssetPair{
+				pairs.BCHUSD: AssetPairData{
 					Altname:    "BCHUSD",
-					AclassBase: "currency",
+					AclassBase: "asset",
 					Base:       "BCH",
 				},
 			},
-			mockResponse: Response{
-				Result: map[string]*AssetPair{
-					"BCHEUR": {
-						Altname:    "BCHEUR",
-						AclassBase: "currency",
-						Base:       "BCH",
-					},
-					"BCHUSD": {
-						Altname:    "BCHUSD",
-						AclassBase: "currency",
-						Base:       "BCH",
-					},
-				},
-			},
+			mockResponse: []byte(`{"error":null,"result":{"BCHEUR":{"altname":"BCHEUR","aclass_base":"asset","base":"BCH","aclass_quote":"","quote":"","lot":"","pair_decimals":0,"lot_decimals":0,"lot_multiplier":0,"leverage_buy":null,"leverage_sell":null,"fees":null,"fees_maker":null,"fee_volume_currency":"","margin_call":0,"margin_stop":0},"BCHUSD":{"altname":"BCHUSD","aclass_base":"asset","base":"BCH","aclass_quote":"","quote":"","lot":"","pair_decimals":0,"lot_decimals":0,"lot_multiplier":0,"leverage_buy":null,"leverage_sell":null,"fees":null,"fees_maker":null,"fee_volume_currency":"","margin_call":0,"margin_stop":0}}}
+`),
 		},
 		{
 			name:      "leverage request",
 			infoLevel: AssetPairsLeverage,
-			expectedResponse: &AssetPairsResponse{
-				"BCHEUR": &AssetPair{
+			expectedResponse: AssetPairsResponse{
+				pairs.BCHEUR: AssetPairData{
 					LeverageBuy:  []float64{1.23},
 					LeverageSell: []float64{2.34},
 				},
 			},
-			mockResponse: Response{
-				Result: map[string]*AssetPair{
-					"BCHEUR": {
-						LeverageBuy:  []float64{1.23},
-						LeverageSell: []float64{2.34},
-					},
-				},
-			},
+			mockResponse: []byte(`{"error":null,"result":{"BCHEUR":{"altname":"","aclass_base":"","base":"","aclass_quote":"","quote":"","lot":"","pair_decimals":0,"lot_decimals":0,"lot_multiplier":0,"leverage_buy":[1.23],"leverage_sell":[2.34],"fees":null,"fees_maker":null,"fee_volume_currency":"","margin_call":0,"margin_stop":0}}}
+`),
 		},
 		{
 			name:      "fees request",
 			infoLevel: AssetPairsFees,
-			expectedResponse: &AssetPairsResponse{
-				"BCHEUR": &AssetPair{
+			expectedResponse: AssetPairsResponse{
+				pairs.BCHEUR: AssetPairData{
 					Fees: [][]float64{
 						{1.23, 2.34},
 					},
 				},
 			},
-			mockResponse: Response{
-				Result: map[string]*AssetPair{
-					"BCHEUR": {
-						Fees: [][]float64{
-							{1.23, 2.34},
-						},
-					},
-				},
-			},
+			mockResponse: []byte(`{"error":null,"result":{"BCHEUR":{"altname":"","aclass_base":"","base":"","aclass_quote":"","quote":"","lot":"","pair_decimals":0,"lot_decimals":0,"lot_multiplier":0,"leverage_buy":null,"leverage_sell":null,"fees":[[1.23,2.34]],"fees_maker":null,"fee_volume_currency":"","margin_call":0,"margin_stop":0}}}
+`),
 		},
 		{
 			name:      "margin request",
 			infoLevel: AssetPairsMargin,
-			expectedResponse: &AssetPairsResponse{
-				"BCHEUR": &AssetPair{
+			expectedResponse: AssetPairsResponse{
+				pairs.BCHEUR: AssetPairData{
 					MarginCall: 10,
 					MarginStop: 20,
 				},
 			},
-			mockResponse: Response{
-				Result: map[string]*AssetPair{
-					"BCHEUR": {
-						MarginCall: 10,
-						MarginStop: 20,
-					},
-				},
-			},
+			mockResponse: []byte(`{"error":null,"result":{"BCHEUR":{"altname":"","aclass_base":"","base":"","aclass_quote":"","quote":"","lot":"","pair_decimals":0,"lot_decimals":0,"lot_multiplier":0,"leverage_buy":null,"leverage_sell":null,"fees":null,"fees_maker":null,"fee_volume_currency":"","margin_call":10,"margin_stop":20}}}
+`),
 		},
 		{
 			name:  "pair filtered request",
-			pairs: []string{"BCHUSD"},
-			expectedResponse: &AssetPairsResponse{
-				"BCHUSD": &AssetPair{
+			pairs: []pairs.AssetPair{pairs.BCHUSD},
+			expectedResponse: AssetPairsResponse{
+				pairs.BCHUSD: AssetPairData{
 					MarginCall: 10,
 					MarginStop: 20,
 				},
 			},
-			mockResponse: Response{
-				Result: map[string]*AssetPair{
-					"BCHUSD": {
-						MarginCall: 10,
-						MarginStop: 20,
-					},
-				},
-			},
+			mockResponse: []byte(`{"error":null,"result":{"BCHUSD":{"altname":"","aclass_base":"","base":"","aclass_quote":"","quote":"","lot":"","pair_decimals":0,"lot_decimals":0,"lot_multiplier":0,"leverage_buy":null,"leverage_sell":null,"fees":null,"fees_maker":null,"fee_volume_currency":"","margin_call":10,"margin_stop":20}}}
+`),
 		},
 	}
 	for _, c := range cases {
@@ -278,8 +195,7 @@ func TestMarket_AssetPairs(t *testing.T) {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
 
-				response, _ := json.Marshal(c.mockResponse)
-				w.Write(response)
+				w.Write(c.mockResponse)
 			}))
 
 			defer ts.Close()
@@ -287,10 +203,7 @@ func TestMarket_AssetPairs(t *testing.T) {
 			k := New()
 			k.BaseURL = ts.URL
 
-			res, err := k.Market.AssetPairs(context.Background(), &AssetPairsRequest{
-				Info:  c.infoLevel,
-				Pairs: c.pairs,
-			})
+			res, err := k.Market.AssetPairs(context.Background(), c.infoLevel, c.pairs...)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -303,93 +216,19 @@ func TestMarket_AssetPairs(t *testing.T) {
 func TestMarket_Ticker(t *testing.T) {
 	cases := []struct {
 		name             string
-		pairs            []string
-		mockResponse     Response
-		expectedResponse *TickerResponse
+		pairs            []pairs.AssetPair
+		mockResponse     []byte
+		expectedResponse TickerResponse
 	}{
 		{
-			name:  "valid request",
-			pairs: []string{"BCHEUR", "BCHUSD"},
-			mockResponse: Response{
-				Result: map[string]TickerInfo{
-					"BCHEUR": {
-						A: []string{
-							"804.900000",
-							"1",
-							"1.000",
-						},
-						B: []string{
-							"802.100000",
-							"1",
-							"1.000",
-						},
-						C: []string{
-							"805.000000",
-							"0.09409409",
-						},
-						V: []string{
-							"6285.91000112",
-							"6402.41926847",
-						},
-						P: []string{
-							"790.741428",
-							"790.497060",
-						},
-						T: []int{
-							12672,
-							12902,
-						},
-						L: []string{
-							"718.200000",
-							"718.200000",
-						},
-						H: []string{
-							"850.600000",
-							"850.600000",
-						},
-						O: "774.800000",
-					},
-					"BCHUSD": {
-						A: []string{
-							"804.900000",
-							"1",
-							"1.000",
-						},
-						B: []string{
-							"802.100000",
-							"1",
-							"1.000",
-						},
-						C: []string{
-							"805.000000",
-							"0.09409409",
-						},
-						V: []string{
-							"6285.91000112",
-							"6402.41926847",
-						},
-						P: []string{
-							"790.741428",
-							"790.497060",
-						},
-						T: []int{
-							12672,
-							12902,
-						},
-						L: []string{
-							"718.200000",
-							"718.200000",
-						},
-						H: []string{
-							"850.600000",
-							"850.600000",
-						},
-						O: "774.800000",
-					},
-				},
+			name: "valid request",
+			pairs: []pairs.AssetPair{
+				pairs.BCHEUR,
+				pairs.BCHUSD,
 			},
-			expectedResponse: &TickerResponse{
-				"BCHEUR": {
+			mockResponse: []byte(`{"error":null,"result":{"BCHEUR":{"a":["804.900000","1","1.000"],"b":["802.100000","1","1.000"],"c":["805.000000","0.09409409"],"v":["6285.91000112","6402.41926847"],"p":["790.741428","790.497060"],"t":[12672,12902],"l":["718.200000","718.200000"],"h":["850.600000","850.600000"],"o":"774.800000"},"BCHUSD":{"a":["804.900000","1","1.000"],"b":["802.100000","1","1.000"],"c":["805.000000","0.09409409"],"v":["6285.91000112","6402.41926847"],"p":["790.741428","790.497060"],"t":[12672,12902],"l":["718.200000","718.200000"],"h":["850.600000","850.600000"],"o":"774.800000"}}}`),
+			expectedResponse: TickerResponse{
+				pairs.BCHEUR: {
 					A: []string{
 						"804.900000",
 						"1",
@@ -426,7 +265,7 @@ func TestMarket_Ticker(t *testing.T) {
 					},
 					O: "774.800000",
 				},
-				"BCHUSD": {
+				pairs.BCHUSD: {
 					A: []string{
 						"804.900000",
 						"1",
@@ -464,9 +303,6 @@ func TestMarket_Ticker(t *testing.T) {
 					O: "774.800000",
 				},
 			},
-		},
-		{
-			name: "empty pairs",
 		},
 	}
 	for _, c := range cases {
@@ -475,8 +311,7 @@ func TestMarket_Ticker(t *testing.T) {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
 
-				response, _ := json.Marshal(c.mockResponse)
-				w.Write(response)
+				w.Write(c.mockResponse)
 			}))
 
 			defer ts.Close()
@@ -497,14 +332,15 @@ func TestMarket_Ticker(t *testing.T) {
 func TestMarket_Ohlc(t *testing.T) {
 	cases := []struct {
 		name             string
-		request          *OhlcRequest
+		request          OhlcRequest
 		mockResponse     []byte
 		expectedResponse *OhlcResponse
+		expectedErr      error
 	}{
 		{
 			name: "valid request",
-			request: &OhlcRequest{
-				Pair: "BCHEUR",
+			request: OhlcRequest{
+				Pair: pairs.BCHEUR,
 			},
 			mockResponse: []byte(`{"error":[],"result":{"BCHEUR":[[1518774960,"1196.0","1196.0","1196.0","1196.0","0.0","0.00000000",0]],"last":1518818040}}`),
 			expectedResponse: &OhlcResponse{
@@ -540,7 +376,8 @@ func TestMarket_Ohlc(t *testing.T) {
 
 			res, err := k.Market.Ohlc(context.Background(), c.request)
 			if err != nil {
-				t.Fatal(err)
+				assert(c.expectedErr.Error(), err.Error(), t)
+				return
 			}
 
 			assert(c.expectedResponse, res, t)
@@ -551,16 +388,18 @@ func TestMarket_Ohlc(t *testing.T) {
 func TestMarket_Depth(t *testing.T) {
 	cases := []struct {
 		name             string
-		request          *DepthRequest
+		pair             pairs.AssetPair
+		count            int
 		mockResponse     []byte
-		expectedResponse *DepthResponse
+		expectedResponse DepthResponse
+		expectedErr      error
 	}{
 		{
 			name:         "valid request",
-			request:      &DepthRequest{Pair: "BCHEUR"},
+			pair:         pairs.BCHEUR,
 			mockResponse: []byte(`{"error":[],"result":{"BCHEUR":{"asks":[["1225.000000","3.729",1518899703]],"bids":[["1222.600000","0.664",1518899718]]}}}`),
-			expectedResponse: &DepthResponse{
-				"BCHEUR": Depth{
+			expectedResponse: DepthResponse{
+				pairs.BCHEUR: Depth{
 					Asks: []DepthItem{
 						{
 							Price:     1225.000000,
@@ -580,10 +419,11 @@ func TestMarket_Depth(t *testing.T) {
 		},
 		{
 			name:         "count request",
-			request:      &DepthRequest{Pair: "BCHEUR", Count: 1},
+			pair:         pairs.BCHEUR,
+			count:        1,
 			mockResponse: []byte(`{"error":[],"result":{"BCHEUR":{"asks":[["1230.100000","14.673",1518900219],["1231.300000","0.112",1518900211]],"bids":[["1230.000000","0.486",1518900183],["1229.800000","0.108",1518900204]]}}}`),
-			expectedResponse: &DepthResponse{
-				"BCHEUR": Depth{
+			expectedResponse: DepthResponse{
+				pairs.BCHEUR: Depth{
 					Asks: []DepthItem{
 						{
 							Price:     1230.100000,
@@ -626,9 +466,10 @@ func TestMarket_Depth(t *testing.T) {
 			k := New()
 			k.BaseURL = ts.URL
 
-			res, err := k.Market.Depth(context.Background(), c.request)
+			res, err := k.Market.Depth(context.Background(), c.pair, c.count)
 			if err != nil {
-				t.Fatal(err)
+				assert(c.expectedErr.Error(), err.Error(), t)
+				return
 			}
 
 			assert(c.expectedResponse, res, t)
@@ -639,14 +480,15 @@ func TestMarket_Depth(t *testing.T) {
 func TestMarket_Trades(t *testing.T) {
 	cases := []struct {
 		name             string
-		request          *TradesRequest
+		request          TradesRequest
 		mockResponse     []byte
 		expectedResponse *TradesResponse
+		expectedErr      error
 	}{
 		{
 			name: "valid request",
-			request: &TradesRequest{
-				Pair: "BCHEUR",
+			request: TradesRequest{
+				Pair: pairs.BCHEUR,
 			},
 			mockResponse: []byte(`{"error":[],"result":{"BCHEUR":[["700000.000000","0.00050000",1501603433.7669,"s","l",""]],"last":"1501605300157840478"}}`),
 			expectedResponse: &TradesResponse{
@@ -680,7 +522,8 @@ func TestMarket_Trades(t *testing.T) {
 
 			res, err := k.Market.Trades(context.Background(), c.request)
 			if err != nil {
-				t.Fatal(err)
+				assert(c.expectedErr.Error(), err.Error(), t)
+				return
 			}
 
 			assert(c.expectedResponse, res, t)
@@ -691,13 +534,13 @@ func TestMarket_Trades(t *testing.T) {
 func TestMarket_Spread(t *testing.T) {
 	cases := []struct {
 		name             string
-		request          *SpreadRequest
+		request          SpreadRequest
 		mockResponse     []byte
 		expectedResponse *SpreadResponse
 	}{
 		{
 			name:         "valid request",
-			request:      &SpreadRequest{Pair: "BCHEUR"},
+			request:      SpreadRequest{Pair: pairs.BCHEUR},
 			mockResponse: []byte(`{"error":[],"result":{"BCHEUR":[[1518904771,"1225.600000","1229.200000"]],"last":1518905570}}`),
 			expectedResponse: &SpreadResponse{
 				Data: []SpreadData{
@@ -725,7 +568,7 @@ func TestMarket_Spread(t *testing.T) {
 			k := New()
 			k.BaseURL = ts.URL
 
-			res, err := k.Market.Spread(context.Background(), &SpreadRequest{Pair: "BCHEUR"})
+			res, err := k.Market.Spread(context.Background(), c.request)
 			if err != nil {
 				t.Fatal(err)
 			}

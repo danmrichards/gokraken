@@ -6,19 +6,21 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/danmrichards/gokraken/asset"
 )
 
 func TestUserData_Balance(t *testing.T) {
 	mockResponse := Response{
-		Result: map[Currency]float64{
-			BCH:  1.23,
-			DASH: 2.34,
+		Result: map[asset.Currency]float64{
+			asset.BCH:  1.23,
+			asset.DASH: 2.34,
 		},
 	}
 
-	expectedResult := &BalanceResponse{
-		BCH:  1.23,
-		DASH: 2.34,
+	expectedResult := BalanceResponse{
+		asset.BCH:  1.23,
+		asset.DASH: 2.34,
 	}
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

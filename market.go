@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/danmrichards/gokraken/asset"
+	"github.com/danmrichards/gokraken/pairs"
 	"github.com/pkg/errors"
 )
 
@@ -37,28 +39,16 @@ func (m *Market) Time(ctx context.Context) (res *TimeResponse, err error) {
 
 // Assets returns asset information from Kraken.
 // https://www.kraken.com/en-gb/help/api#get-asset-info
-func (m *Market) Assets(ctx context.Context, assetReq *AssetsRequest) (res *AssetsResponse, err error) {
-	if assetReq == nil {
-		assetReq = &AssetsRequest{}
-	}
-
-	if assetReq.Info == "" {
-		assetReq.Info = AssetInfo
-	}
-
-	if assetReq.AClass == "" {
-		assetReq.AClass = "currency"
-	}
-
+func (m *Market) Assets(ctx context.Context, info AssetsInfoLevel, aClass AssetsClass, assets ...asset.Currency) (res AssetsResponse, err error) {
 	body := url.Values{
-		"info":   []string{string(assetReq.Info)},
-		"aclass": []string{assetReq.AClass},
+		"info":   []string{string(info)},
+		"aclass": []string{string(aClass)},
 	}
 
-	if len(assetReq.Asset) > 0 {
-		assetStrings := make([]string, len(assetReq.Asset))
-		for i, asset := range assetReq.Asset {
-			assetStrings[i] = string(asset)
+	if len(assets) > 0 {
+		assetStrings := make([]string, len(assets))
+		for i, a := range assets {
+			assetStrings[i] = string(a)
 		}
 
 		body.Add("asset", strings.Join(assetStrings, ","))
@@ -74,28 +64,30 @@ func (m *Market) Assets(ctx context.Context, assetReq *AssetsRequest) (res *Asse
 		return
 	}
 
-	err = krakenResp.ExtractResult(&res)
+	var tmp map[string]Asset
+	err = krakenResp.ExtractResult(&tmp)
+
+	assetsResponse := make(AssetsResponse)
+	for assetStr, assetData := range tmp {
+		if currency := asset.Find(assetStr); currency != nil {
+			assetsResponse[*currency] = assetData
+		}
+	}
+
+	res = assetsResponse
 	return
 }
 
 // AssetPairs returns tradable asset pairs from Kraken.
 // https://www.kraken.com/en-gb/help/api#get-tradable-pairs
-func (m *Market) AssetPairs(ctx context.Context, assetPairReq *AssetPairsRequest) (res *AssetPairsResponse, err error) {
-	if assetPairReq == nil {
-		assetPairReq = &AssetPairsRequest{}
-	}
-
-	if assetPairReq.Info == "" {
-		assetPairReq.Info = AssetPairsInfo
-	}
-
+func (m *Market) AssetPairs(ctx context.Context, info AssetPairsInfoLevel, reqPairs ...pairs.AssetPair) (res AssetPairsResponse, err error) {
 	body := url.Values{
-		"info": []string{string(assetPairReq.Info)},
+		"info": []string{string(info)},
 	}
 
-	if len(assetPairReq.Pairs) > 0 {
-		pairStrings := make([]string, len(assetPairReq.Pairs))
-		for i, asset := range assetPairReq.Pairs {
+	if len(reqPairs) > 0 {
+		pairStrings := make([]string, len(reqPairs))
+		for i, asset := range reqPairs {
 			pairStrings[i] = string(asset)
 		}
 
@@ -112,15 +104,33 @@ func (m *Market) AssetPairs(ctx context.Context, assetPairReq *AssetPairsRequest
 		return
 	}
 
-	err = krakenResp.ExtractResult(&res)
+	var tmp map[string]AssetPairData
+	err = krakenResp.ExtractResult(&tmp)
+
+	assetPairsResponse := make(AssetPairsResponse)
+	for pairStr, pairData := range tmp {
+		if pair := pairs.Find(pairStr); pair != nil {
+			assetPairsResponse[*pair] = pairData
+		}
+	}
+
+	res = assetPairsResponse
 	return
 }
 
 // Ticker returns ticker information from Kraken.
 // https://www.kraken.com/en-gb/help/api#get-ticker-info
-func (m *Market) Ticker(ctx context.Context, pairs ...string) (res *TickerResponse, err error) {
-	body := url.Values{
-		"pair": []string{strings.Join(pairs, ",")},
+func (m *Market) Ticker(ctx context.Context, reqPairs ...pairs.AssetPair) (res TickerResponse, err error) {
+	var body url.Values
+	if len(reqPairs) > 0 {
+		pairStrings := make([]string, len(reqPairs))
+		for i, asset := range reqPairs {
+			pairStrings[i] = string(asset)
+		}
+
+		body = url.Values{
+			"pair": []string{strings.Join(pairStrings, ",")},
+		}
 	}
 
 	req, err := m.Client.Dial(ctx, http.MethodPost, TickerResource, body)
@@ -133,19 +143,29 @@ func (m *Market) Ticker(ctx context.Context, pairs ...string) (res *TickerRespon
 		return
 	}
 
-	err = krakenResp.ExtractResult(&res)
+	var tmp map[string]TickerInfo
+	err = krakenResp.ExtractResult(&tmp)
+
+	tickerResponse := make(TickerResponse)
+	for pairStr, tickerData := range tmp {
+		if pair := pairs.Find(pairStr); pair != nil {
+			tickerResponse[*pair] = tickerData
+		}
+	}
+
+	res = tickerResponse
 	return
 }
 
 // Ohlc returns ohlc information from Kraken.
 // https://www.kraken.com/en-gb/help/api#get-ohlc-data
-func (m *Market) Ohlc(ctx context.Context, ohlcReq *OhlcRequest) (res *OhlcResponse, err error) {
+func (m *Market) Ohlc(ctx context.Context, ohlcReq OhlcRequest) (res *OhlcResponse, err error) {
 	if ohlcReq.Interval == 0 {
 		ohlcReq.Interval = 1
 	}
 
 	body := url.Values{
-		"pair":     []string{ohlcReq.Pair},
+		"pair":     []string{ohlcReq.Pair.String()},
 		"interval": []string{strconv.Itoa(ohlcReq.Interval)},
 	}
 
@@ -180,7 +200,7 @@ func (m *Market) Ohlc(ctx context.Context, ohlcReq *OhlcRequest) (res *OhlcRespo
 		Data: make([]OhlcData, 0),
 	}
 
-	ohlcData, ok := tmp[ohlcReq.Pair].([]interface{})
+	ohlcData, ok := tmp[ohlcReq.Pair.String()].([]interface{})
 	if !ok {
 		err = fmt.Errorf("could not extract ohlc data where pair=%s", ohlcReq.Pair)
 		return
@@ -266,10 +286,10 @@ func (m *Market) Ohlc(ctx context.Context, ohlcReq *OhlcRequest) (res *OhlcRespo
 
 // Depth returns the order book from Kraken.
 // https://www.kraken.com/en-gb/help/api#get-order-book
-func (m *Market) Depth(ctx context.Context, depthReq *DepthRequest) (res *DepthResponse, err error) {
+func (m *Market) Depth(ctx context.Context, pair pairs.AssetPair, count int) (res DepthResponse, err error) {
 	body := url.Values{
-		"pair":  []string{depthReq.Pair},
-		"count": []string{strconv.Itoa(depthReq.Count)},
+		"pair":  []string{pair.String()},
+		"count": []string{strconv.Itoa(count)},
 	}
 
 	req, err := m.Client.Dial(ctx, http.MethodPost, DepthResource, body)
@@ -282,15 +302,25 @@ func (m *Market) Depth(ctx context.Context, depthReq *DepthRequest) (res *DepthR
 		return
 	}
 
-	err = krakenResp.ExtractResult(&res)
+	var tmp map[string]Depth
+	err = krakenResp.ExtractResult(&tmp)
+
+	depthResponse := make(DepthResponse)
+	for pairStr, depthData := range tmp {
+		if pair := pairs.Find(pairStr); pair != nil {
+			depthResponse[*pair] = depthData
+		}
+	}
+
+	res = depthResponse
 	return
 }
 
 // Trades returns the recent trades from Kraken.
 // https://www.kraken.com/en-gb/help/api#get-recent-trades
-func (m *Market) Trades(ctx context.Context, tradeReq *TradesRequest) (res *TradesResponse, err error) {
+func (m *Market) Trades(ctx context.Context, tradeReq TradesRequest) (res *TradesResponse, err error) {
 	body := url.Values{
-		"pair": []string{tradeReq.Pair},
+		"pair": []string{tradeReq.Pair.String()},
 	}
 
 	if tradeReq.Since != 0 {
@@ -323,7 +353,7 @@ func (m *Market) Trades(ctx context.Context, tradeReq *TradesRequest) (res *Trad
 		Trades: make([]Trade, 0),
 	}
 
-	trades, ok := tmp[tradeReq.Pair].([]interface{})
+	trades, ok := tmp[tradeReq.Pair.String()].([]interface{})
 	if !ok {
 		err = fmt.Errorf("could not extract trades where pair=%s", tradeReq.Pair)
 		return
@@ -394,9 +424,9 @@ func (m *Market) Trades(ctx context.Context, tradeReq *TradesRequest) (res *Trad
 
 // Spread returns the spread data from Kraken.
 // https://www.kraken.com/en-gb/help/api#get-recent-spread-data
-func (m *Market) Spread(ctx context.Context, spreadReq *SpreadRequest) (res *SpreadResponse, err error) {
+func (m *Market) Spread(ctx context.Context, spreadReq SpreadRequest) (res *SpreadResponse, err error) {
 	body := url.Values{
-		"pair": []string{spreadReq.Pair},
+		"pair": []string{spreadReq.Pair.String()},
 	}
 
 	if spreadReq.Since != 0 {
@@ -430,7 +460,7 @@ func (m *Market) Spread(ctx context.Context, spreadReq *SpreadRequest) (res *Spr
 		Data: make([]SpreadData, 0),
 	}
 
-	spreadData, ok := tmp[spreadReq.Pair].([]interface{})
+	spreadData, ok := tmp[spreadReq.Pair.String()].([]interface{})
 	if !ok {
 		err = fmt.Errorf("could not extract spread data where pair=%s", spreadReq.Pair)
 		return

@@ -1,5 +1,7 @@
 package gokraken
 
+import "github.com/danmrichards/gokraken/pairs"
+
 const (
 	// AssetPairsResource is the API resource for the Kraken API asset info.
 	AssetPairsResource = "AssetPairs"
@@ -20,17 +22,11 @@ const (
 // AssetPairsInfoLevel represents an info level for an asset pairs request.
 type AssetPairsInfoLevel string
 
-// AssetPairsRequest represents a request to list asset pairs from Kraken.
-type AssetPairsRequest struct {
-	Info  AssetPairsInfoLevel // Info to retrieve (default: info).
-	Pairs []string            // List of asset pairs to get info on.
-}
-
 // AssetPairsResponse represents an array of asset pairs and their info.
-type AssetPairsResponse map[string]*AssetPair
+type AssetPairsResponse map[pairs.AssetPair]AssetPairData
 
-// AssetPair represents a tradeable asset pair from Kraken.
-type AssetPair struct {
+// AssetPairData contains data about a tradeable asset pair from Kraken.
+type AssetPairData struct {
 	Altname           string      `json:"altname"`
 	AclassBase        string      `json:"aclass_base"`
 	Base              string      `json:"base"`

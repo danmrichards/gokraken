@@ -1,11 +1,13 @@
 package gokraken
 
+import "github.com/danmrichards/gokraken/pairs"
+
 // TickerResource is the API resource for the Kraken API ticker.
 const TickerResource = "Ticker"
 
 // TickerResponse represents the response from the Ticker endpoint of the
 // Kraken API.
-type TickerResponse map[string]TickerInfo
+type TickerResponse map[pairs.AssetPair]TickerInfo
 
 // TickerInfo represents the TickerInfo for an asset pair.
 type TickerInfo struct {

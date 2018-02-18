@@ -53,9 +53,6 @@ func main() {
 }
 ```
 
-## Advanced Usage
-Coming soon
-
 ## Roadmap
 - [x] Base repo structure
 - [x] Public API calls working

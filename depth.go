@@ -4,19 +4,15 @@ import (
 	"encoding/json"
 	"strconv"
 	"time"
+
+	"github.com/danmrichards/gokraken/pairs"
 )
 
 // DepthResource is the API resource for the Kraken API order book.
 const DepthResource = "Depth"
 
-// DepthRequest represents a request to list the order book from Kraken.
-type DepthRequest struct {
-	Pair  string
-	Count int
-}
-
 // DepthResponse represents the response from the Kraken order book endpoint.
-type DepthResponse map[string]Depth
+type DepthResponse map[pairs.AssetPair]Depth
 
 // Depth is an order book response for a given asset pair.
 type Depth struct {
