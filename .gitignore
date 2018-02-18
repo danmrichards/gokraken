@@ -19,3 +19,7 @@
 
 ### JetBrains ###
 .idea
+
+### Binaries ###
+assets/cmd/cmd
+pairs/cmd/cmd
