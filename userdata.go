@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/danmrichards/gokraken/asset"
 )
@@ -54,7 +55,7 @@ func (u *UserData) TradeBalance(ctx context.Context, assetClass AssetsClass, bas
 	return
 }
 
-// TradeBalance returns an order info in open array with txid as the key.
+// OpenOrders returns an order info in open array with txid as the key.
 // https://www.kraken.com/help/api#get-open-orders
 func (u *UserData) OpenOrders(ctx context.Context, trades bool, userRef int64) (res *OpenOrdersResponse, err error) {
 	body := url.Values{
@@ -70,6 +71,162 @@ func (u *UserData) OpenOrders(ctx context.Context, trades bool, userRef int64) (
 	}
 
 	req, err := u.Client.DialWithAuth(ctx, http.MethodPost, OpenOrdersResource, body)
+	if err != nil {
+		return
+	}
+
+	krakenResp, err := u.Client.Call(req)
+	if err != nil {
+		return
+	}
+
+	err = krakenResp.ExtractResult(&res)
+	return
+}
+
+// ClosedOrders returns an order info array.
+// https://www.kraken.com/en-gb/help/api#get-closed-orders
+func (u *UserData) ClosedOrders(ctx context.Context, closedReq ClosedOrdersRequest) (res *ClosedOrdersResponse, err error) {
+	body := url.Values{
+		"trades":    []string{"false"},
+		"closetime": []string{string(OrderCloseTimeBoth)},
+	}
+
+	if closedReq.Trades != false {
+		body["trades"] = []string{"true"}
+	}
+
+	if closedReq.UserRef != 0 {
+		body["userref"] = []string{strconv.FormatInt(closedReq.UserRef, 10)}
+	}
+
+	if closedReq.Start != nil {
+		body["start"] = []string{strconv.FormatInt(closedReq.Start.Unix(), 10)}
+	}
+
+	if closedReq.End != nil {
+		body["end"] = []string{strconv.FormatInt(closedReq.End.Unix(), 10)}
+	}
+
+	if closedReq.Ofs != 0 {
+		body["ofs"] = []string{strconv.Itoa(closedReq.Ofs)}
+	}
+
+	if string(closedReq.CloseTime) != "" {
+		body["closetime"] = []string{string(closedReq.CloseTime)}
+	}
+
+	req, err := u.Client.DialWithAuth(ctx, http.MethodPost, ClosedOrdersResource, body)
+	if err != nil {
+		return
+	}
+
+	krakenResp, err := u.Client.Call(req)
+	if err != nil {
+		return
+	}
+
+	err = krakenResp.ExtractResult(&res)
+	return
+}
+
+// QueryOrders returns an associative array of order info.
+// https://www.kraken.com/en-gb/help/api#query-orders-info
+func (u *UserData) QueryOrders(ctx context.Context, trades bool, userRef int64, txids ...int64) (res *QueryOrdersResponse, err error) {
+	body := url.Values{
+		"trades": []string{"false"},
+	}
+
+	if trades {
+		body["trades"] = []string{"true"}
+	}
+
+	if len(txids) > 0 {
+		txidStrings := make([]string, len(txids))
+		for i := range txids {
+			txidStrings[i] = strconv.FormatInt(txids[i], 10)
+		}
+
+		body["txid"] = []string{strings.Join(txidStrings, ",")}
+	}
+
+	req, err := u.Client.DialWithAuth(ctx, http.MethodPost, QueryOrdersResource, body)
+	if err != nil {
+		return
+	}
+
+	krakenResp, err := u.Client.Call(req)
+	if err != nil {
+		return
+	}
+
+	err = krakenResp.ExtractResult(&res)
+	return
+}
+
+// TradesHistory returns an array of trade info.
+// https://www.kraken.com/en-gb/help/api#get-trades-history
+func (u *UserData) TradesHistory(ctx context.Context, tradesReq TradesHistoryRequest) (res *TradesHistoryResponse, err error) {
+	body := url.Values{
+		"type":   []string{string(tradesReq.Type)},
+		"trades": []string{"false"},
+	}
+
+	if string(tradesReq.Type) != "" {
+		body["type"] = []string{string(tradesReq.Type)}
+	}
+
+	if tradesReq.Trades != false {
+		body["trades"] = []string{"true"}
+	}
+
+	if tradesReq.Start != nil {
+		body["start"] = []string{strconv.FormatInt(tradesReq.Start.Unix(), 10)}
+	}
+
+	if tradesReq.End != nil {
+		body["end"] = []string{strconv.FormatInt(tradesReq.End.Unix(), 10)}
+	}
+
+	if tradesReq.Ofs != 0 {
+		body["ofs"] = []string{strconv.Itoa(tradesReq.Ofs)}
+	}
+
+	req, err := u.Client.DialWithAuth(ctx, http.MethodPost, TradesHistoryResource, body)
+	if err != nil {
+		return
+	}
+
+	krakenResp, err := u.Client.Call(req)
+	if err != nil {
+		return
+	}
+
+	err = krakenResp.ExtractResult(&res)
+	return
+}
+
+// QueryTrades returns an associative array of trade info.
+// https://www.kraken.com/en-gb/help/api#query-trades-info
+func (u *UserData) QueryTrades(ctx context.Context, trades bool, txids ...int64) (res *QueryTradesResponse, err error) {
+	body := url.Values{
+		"trades": []string{"false"},
+	}
+
+	if trades != false {
+		body["trades"] = []string{"true"}
+	}
+
+	if len(txids) > 0 {
+		txidStrings := make([]string, len(txids))
+		for i := range txids {
+			txidStrings[i] = strconv.FormatInt(txids[i], 10)
+		}
+
+		body["txid"] = []string{strings.Join(txidStrings, ",")}
+	}
+
+	req, err := u.Client.DialWithAuth(ctx, http.MethodPost, TradesInfoResource, body)
 	if err != nil {
 		return
 	}

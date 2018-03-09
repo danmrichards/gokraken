@@ -1,8 +1,27 @@
 package gokraken
 
-import "github.com/danmrichards/gokraken/pairs"
+import (
+	"time"
+
+	"github.com/danmrichards/gokraken/pairs"
+)
 
 const (
+	// ClosedOrdersResource is the API resource for closed orders.
+	ClosedOrdersResource = "ClosedOrders"
+
+	// QueryOrdersResource is the API resource for querying orders.
+	QueryOrdersResource = "QueryOrders"
+
+	// OrderCloseTimeOpen is the time an order opens.
+	OrderCloseTimeOpen OrderCloseTime = "open"
+
+	// OrderCloseTimeOpen is the time an order closes.
+	OrderCloseTimeClose OrderCloseTime = "close"
+
+	// OrderCloseTimeOpen is the time an order opens and closes.
+	OrderCloseTimeBoth OrderCloseTime = "both"
+
 	// OpenOrdersResource is the API resource for open orders.
 	OpenOrdersResource = "OpenOrders"
 
@@ -43,6 +62,31 @@ const (
 	OrderTypeSettlePosition OrderType = "settle-position"
 )
 
+// ClosedOrdersRequest represents a request to get closed orders from Kraken.
+type ClosedOrdersRequest struct {
+	Trades    bool           // Whether or not to include trades in output.
+	UserRef   int64          // Restrict results to given user reference id.
+	Start     *time.Time     // Starting unix timestamp or order tx id of results.
+	End       *time.Time     // Ending unix timestamp or order tx id of results (optional.  inclusive)
+	Ofs       int            // Result offset.
+	CloseTime OrderCloseTime // Which time to use.
+}
+
+// ClosedOrdersResponse represents the response from the ClosedOrders endpoint
+// of the Kraken API.
+type ClosedOrdersResponse struct {
+	Closed map[string]Order `json:"closed"`
+	Count  int              `json:"count"`
+}
+
+// OrderCloseTime is the time to close an order.
+type OrderCloseTime string
+
+// QueryOrdersResponse represents the response from the QueryOrders endpoint
+// of the Kraken API.
+type QueryOrdersResponse map[string]Order
+
+// OrderType is a type of Kraken order.
 type OrderType string
 
 // Order represents a single order
