@@ -308,3 +308,177 @@ func TestUserData_QueryTrades(t *testing.T) {
 
 	assert(expectedResult, res, t)
 }
+
+func TestUserData_OpenPositions(t *testing.T) {
+	mockResponse := []byte(`{"result":{"1234":{"ordertxid":"4321","pair":"BCHEUR","time":1520633741,"type":"buy","ordertype":"market","cost":1.23,"fee":1.23,"vol":1.23,"vol_closed":1.23,"margin":1.23,"value":1.23,"net":1.23,"misc":"foo,bar,baz","oflags":"qux,quux","viqc":1.23}}}`)
+
+	expectedResult := OpenPositionsResponse{
+		"1234": {
+			OrderTxid: "4321",
+			Pair:      pairs.BCHEUR.String(),
+			Time:      1520633741,
+			Type:      string(TradeBuy),
+			OrderType: string(OrderTypeMarket),
+			Cost:      1.23,
+			Fee:       1.23,
+			Vol:       1.23,
+			VolClosed: 1.23,
+			Margin:    1.23,
+			Value:     1.23,
+			Net:       1.23,
+			Misc:      "foo,bar,baz",
+			OFlags:    "qux,quux",
+			Viqc:      1.23,
+		},
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		w.Write(mockResponse)
+	}))
+
+	defer ts.Close()
+
+	k := NewWithAuth("api_key", "cHJpdmF0ZV9rZXk=")
+	k.BaseURL = ts.URL
+
+	res, err := k.UserData.OpenPositions(context.Background(), true, 1234)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert(expectedResult, res, t)
+}
+
+func TestUserData_Ledgers(t *testing.T) {
+	mockResponse := []byte(`{"result":{"1234":{"refid":"4321","time":1520633741,"type":"all","aclass":"currency","asset":"DASH","amount":1.23,"fee":1.23,"balance":1.23}}}`)
+
+	expectedResult := LedgersResponse{
+		"1234": {
+			Refid:   "4321",
+			Time:    1520633741,
+			Type:    string(LedgerTypeAll),
+			Aclass:  string(AssetCurrency),
+			Asset:   asset.DASH.String(),
+			Amount:  1.23,
+			Fee:     1.23,
+			Balance: 1.23,
+		},
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		w.Write(mockResponse)
+	}))
+
+	defer ts.Close()
+
+	k := NewWithAuth("api_key", "cHJpdmF0ZV9rZXk=")
+	k.BaseURL = ts.URL
+
+	now := time.Now()
+	req := LedgersRequest{
+		Aclass: AssetCurrency,
+		Assets: []asset.Currency{
+			asset.DASH,
+		},
+		Type:  LedgerTypeAll,
+		Start: &now,
+		End:   &now,
+		Ofs:   1,
+	}
+	res, err := k.UserData.Ledgers(context.Background(), req)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert(expectedResult, res, t)
+}
+
+func TestUserData_QueryLedgers(t *testing.T) {
+	mockResponse := []byte(`{"result":{"1234":{"refid":"4321","time":1520633741,"type":"all","aclass":"currency","asset":"DASH","amount":1.23,"fee":1.23,"balance":1.23}}}`)
+
+	expectedResult := LedgersResponse{
+		"1234": {
+			Refid:   "4321",
+			Time:    1520633741,
+			Type:    string(LedgerTypeAll),
+			Aclass:  string(AssetCurrency),
+			Asset:   asset.DASH.String(),
+			Amount:  1.23,
+			Fee:     1.23,
+			Balance: 1.23,
+		},
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		w.Write(mockResponse)
+	}))
+
+	defer ts.Close()
+
+	k := NewWithAuth("api_key", "cHJpdmF0ZV9rZXk=")
+	k.BaseURL = ts.URL
+
+	res, err := k.UserData.QueryLedgers(context.Background(), 1234)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert(expectedResult, res, t)
+}
+
+func TestUserData_TradeVolume(t *testing.T) {
+	mockResponse := []byte(`{"error":[],"result":{"currency":"ZUSD","fees":{"BCHEUR":{"fee":"0.2600","maxfee":"0.2600","minfee":"0.1000","nextfee":"0.2400","nextvolume":"50000.0000","tiervolume":"0.0000"}},"fees_maker":{"BCHEUR":{"fee":"0.1600","maxfee":"0.1600","minfee":"0.0000","nextfee":"0.1400","nextvolume":"50000.0000","tiervolume":"0.0000"}},"volume":"0.0000"}}`)
+
+	expectedResult := &TradeVolumeResponse{
+		Currency: asset.ZUSD.String(),
+		Fees: map[string]Fee{
+			pairs.BCHEUR.String(): {
+				Fee:        "0.2600",
+				Maxfee:     "0.2600",
+				Minfee:     "0.1000",
+				Nextfee:    "0.2400",
+				Nextvolume: "50000.0000",
+				Tiervolume: "0.0000",
+			},
+		},
+		FeesMaker: map[string]Fee{
+			pairs.BCHEUR.String(): {
+				Fee:        "0.1600",
+				Maxfee:     "0.1600",
+				Minfee:     "0.0000",
+				Nextfee:    "0.1400",
+				Nextvolume: "50000.0000",
+				Tiervolume: "0.0000",
+			},
+		},
+		Volume: "0.0000",
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		w.Write(mockResponse)
+	}))
+
+	defer ts.Close()
+
+	k := NewWithAuth("api_key", "cHJpdmF0ZV9rZXk=")
+	k.BaseURL = ts.URL
+
+	res, err := k.UserData.TradeVolume(context.Background(), true, pairs.BCHEUR)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert(expectedResult, res, t)
+}

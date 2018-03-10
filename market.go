@@ -170,7 +170,7 @@ func (m *Market) Ohlc(ctx context.Context, ohlcReq OhlcRequest) (res *OhlcRespon
 	}
 
 	if ohlcReq.Since != 0 {
-		body["since"] = []string{strconv.FormatInt(ohlcReq.Since, 10)}
+		body.Add("since", strconv.FormatInt(ohlcReq.Since, 10))
 	}
 
 	req, err := m.Client.Dial(ctx, http.MethodPost, OhlcResource, body)
@@ -324,7 +324,7 @@ func (m *Market) Trades(ctx context.Context, tradeReq TradesRequest) (res *Trade
 	}
 
 	if tradeReq.Since != 0 {
-		body["since"] = []string{strconv.FormatInt(tradeReq.Since, 10)}
+		body.Add("since", strconv.FormatInt(tradeReq.Since, 10))
 	}
 
 	req, err := m.Client.Dial(ctx, http.MethodPost, TradesResource, body)
@@ -430,7 +430,7 @@ func (m *Market) Spread(ctx context.Context, spreadReq SpreadRequest) (res *Spre
 	}
 
 	if spreadReq.Since != 0 {
-		body["since"] = []string{strconv.FormatInt(spreadReq.Since, 10)}
+		body.Add("since", strconv.FormatInt(spreadReq.Since, 10))
 	}
 
 	req, err := m.Client.Dial(ctx, http.MethodPost, SpreadResource, body)

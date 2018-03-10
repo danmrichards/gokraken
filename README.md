@@ -59,7 +59,7 @@ func main() {
 - [x] Private API calls working
 - [x] Travis CI
 - [x] Implement public market data endpoints
-- [ ] Implement private user data endpoints
+- [x] Implement private user data endpoints
 - [ ] Implement private user trading endpoints
 - [ ] Implement private user funding endpoints
 - [ ] Test all the things!

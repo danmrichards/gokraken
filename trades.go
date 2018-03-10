@@ -7,14 +7,17 @@ import (
 )
 
 const (
-	// TradesResource is the API resource for the Kraken API recent trades.
+	// TradesResource is the API resource for Kraken API recent trades.
 	TradesResource = "Trades"
 
-	// TradesHistoryResource is the API resource for the Kraken API trade history.
+	// TradesHistoryResource is the API resource for Kraken API trade history.
 	TradesHistoryResource = "TradesHistory"
 
-	// TradesInfoResource is the API resource for the Kraken API trades info.
+	// TradesInfoResource is the API resource for Kraken API trades info.
 	TradesInfoResource = "TradesInfo"
+
+	// TradeVolumeResource is the API resource for Kraken API trade volume.
+	TradeVolumeResource = "TradeVolume"
 
 	// TradeBuy indicates that a trade was a 'buy'.
 	TradeBuy TradeBuySell = "buy"
@@ -108,4 +111,23 @@ type UserTrade struct {
 	Vol       float64      `json:"vol"`
 	Margin    float64      `json:"margin"`
 	Misc      string       `json:"misc"`
+}
+
+// QueryTradesResponse represents the response from the TradeVolume endpoint
+// of the Kraken API.
+type TradeVolumeResponse struct {
+	Currency  string         `json:"currency"`
+	Fees      map[string]Fee `json:"fees"`
+	FeesMaker map[string]Fee `json:"fees_maker"`
+	Volume    string         `json:"volume"`
+}
+
+// Fee represents a fee within the Kraken TradeVolume response.
+type Fee struct {
+	Fee        string `json:"fee"`
+	Maxfee     string `json:"maxfee"`
+	Minfee     string `json:"minfee"`
+	Nextfee    string `json:"nextfee"`
+	Nextvolume string `json:"nextvolume"`
+	Tiervolume string `json:"tiervolume"`
 }
