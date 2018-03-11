@@ -53,6 +53,7 @@ type Kraken struct {
 	HTTPClient *http.Client
 	Market     *Market
 	UserData   *UserData
+	Trading    *Trading
 	PrivateKey string
 }
 
@@ -93,6 +94,7 @@ func NewWithHTTPClient(httpClient *http.Client) *Kraken {
 func (k *Kraken) initServices() {
 	k.Market = &Market{k}
 	k.UserData = &UserData{k}
+	k.Trading = &Trading{k}
 }
 
 // GetBaseURL returns the base URI of the Kraken API.

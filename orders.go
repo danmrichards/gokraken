@@ -7,6 +7,9 @@ import (
 )
 
 const (
+	// AddOrderResource is the API resource for adding orders.
+	AddOrderResource = "AddOrder"
+
 	// ClosedOrdersResource is the API resource for closed orders.
 	ClosedOrdersResource = "ClosedOrders"
 
@@ -24,6 +27,23 @@ const (
 
 	// OpenOrdersResource is the API resource for open orders.
 	OpenOrdersResource = "OpenOrders"
+
+	// OrderFlagViqc is an order flag for volume in quote currency
+	// (not available for leveraged orders).
+	OrderFlagViqc OrderFlag = "viqc"
+
+	// OrderFlagFcib is an order flag for prefer fee in base currency.
+	OrderFlagFcib OrderFlag = "fcib"
+
+	// OrderFlagFciq is an order flag for prefer fee in quote currency.
+	OrderFlagFciq OrderFlag = "fciq"
+
+	// OrderFlagNompp is an order flag for no market price protection.
+	OrderFlagNompp OrderFlag = "nompp"
+
+	// OrderFlagPost is an order flag for post only order
+	// (available when ordertype // limit).
+	OrderFlagPost OrderFlag = "post"
 
 	// OrderTypeMarket is the market order type.
 	OrderTypeMarket OrderType = "market"
@@ -86,6 +106,9 @@ type OrderCloseTime string
 // of the Kraken API.
 type QueryOrdersResponse map[string]Order
 
+// OrderFlag is a flag to use when creating a Kraken order.
+type OrderFlag string
+
 // OrderType is a type of Kraken order.
 type OrderType string
 
@@ -125,8 +148,35 @@ type OrderDescription struct {
 	Type           string          `json:"type"`
 }
 
-// OpenOrdersResponse represents an open order from Kraken.
+// OpenOrdersResponse represents the response from the OpenOrders endpoint
+// of the Kraken API.
 type OpenOrdersResponse struct {
 	Open  map[string]Order `json:"open"`
 	Count int              `json:"count"`
+}
+
+// UserOrder represents a user request to add an order.
+type UserOrder struct {
+	Pair              pairs.AssetPair // Asset pair.
+	Type              TradeBuySell    // Type of order (buy/sell).
+	OrderType         OrderType       // Order type.
+	Price             float64         // Price.
+	Price2            float64         // Secondary price.
+	Volume            float64         // Order volume in lots.
+	Leverage          string          // Amount of leverage desired.
+	OFlags            []OrderFlag     // List of order flags.
+	StartTm           string          // Scheduled start time: 0 (now - default), +<n> (schedule start time <n> seconds from now) , <n> (unix timestamp of start time).
+	ExpireTm          string          // expiration time 0 (no expiration - default), +<n> (expire <n> seconds from now) , <n> (unix timestamp of expiration time).
+	UserRef           int             // User reference id.
+	Validate          bool            // Validate inputs only.
+	CloseOrderType    OrderType       // Type of closing order to add to system when order gets filled.
+	ClosedOrderPrice  float64         // Price of closing order to add to system when order gets filled.
+	ClosedOrderPrice2 float64         // Secondary price of closing order to add to system when order gets filled.
+}
+
+// AddOrderResponse represents the response from the AddOrder endpoint
+// of the Kraken API.
+type AddOrderResponse struct {
+	Description OrderDescription `json:"descr"`
+	TxIDs       []string         `json:"txid"`
 }
