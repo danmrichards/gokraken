@@ -46,3 +46,31 @@ func TestUserData_AddOrder(t *testing.T) {
 
 	assert(expectedResult, res, t)
 }
+
+func TestUserData_CancelOrder(t *testing.T) {
+	mockResponse := []byte(`{"error":[],"result":{"count": 1, "pending": true}}`)
+
+	expectedResult := &CancelOrderResponse{
+		Count:   1,
+		Pending: true,
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		w.Write(mockResponse)
+	}))
+
+	defer ts.Close()
+
+	k := NewWithAuth("api_key", "cHJpdmF0ZV9rZXk=")
+	k.BaseURL = ts.URL
+
+	res, err := k.UserData.CancelOrder(context.Background(), 1234)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert(expectedResult, res, t)
+}

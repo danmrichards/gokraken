@@ -10,6 +10,9 @@ const (
 	// AddOrderResource is the API resource for adding orders.
 	AddOrderResource = "AddOrder"
 
+	// CancelOrderResource is the API resource for canceling open orders.
+	CancelOrderResource = "CancelOrder"
+
 	// ClosedOrdersResource is the API resource for closed orders.
 	ClosedOrdersResource = "ClosedOrders"
 
@@ -179,4 +182,11 @@ type UserOrder struct {
 type AddOrderResponse struct {
 	Description OrderDescription `json:"descr"`
 	TxIDs       []string         `json:"txid"`
+}
+
+// CancelOrderResponse represents the response from the CancelOrder endpoint
+// of the Kraken API.
+type CancelOrderResponse struct {
+	Count   int  `json:"count"`
+	Pending bool `json:"pending"`
 }

@@ -82,3 +82,24 @@ func (u *UserData) AddOrder(ctx context.Context, order UserOrder) (res *AddOrder
 	err = krakenResp.ExtractResult(&res)
 	return
 }
+
+// CancelOrder cancels an open order via the Kraken API.
+// https://www.kraken.com/en-gb/help/api#cancel-open-order
+func (u *UserData) CancelOrder(ctx context.Context, txid int64) (res *CancelOrderResponse, err error) {
+	body := url.Values{
+		"txid": {strconv.FormatInt(txid, 10)},
+	}
+
+	req, err := u.Client.DialWithAuth(ctx, http.MethodPost, CancelOrderResource, body)
+	if err != nil {
+		return
+	}
+
+	krakenResp, err := u.Client.Call(req)
+	if err != nil {
+		return
+	}
+
+	err = krakenResp.ExtractResult(&res)
+	return
+}
