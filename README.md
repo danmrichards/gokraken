@@ -60,6 +60,6 @@ func main() {
 - [x] Travis CI
 - [x] Implement public market data endpoints
 - [x] Implement private user data endpoints
-- [ ] Implement private user trading endpoints
+- [x] Implement private user trading endpoints
 - [ ] Implement private user funding endpoints
 - [ ] Test all the things!
