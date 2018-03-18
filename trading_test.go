@@ -9,7 +9,7 @@ import (
 	"github.com/danmrichards/gokraken/pairs"
 )
 
-func TestUserData_AddOrder(t *testing.T) {
+func TestTrading_AddOrder(t *testing.T) {
 	mockResponse := []byte(`{"error":[],"result":{"descr":{"pair":0,"close":"4321","leverage":"","order":"1234","ordertype":"","price":"","price2":"","type":""},"txid":["2345","3456"]}}`)
 
 	expectedResult := &AddOrderResponse{
@@ -39,7 +39,7 @@ func TestUserData_AddOrder(t *testing.T) {
 		Volume:    1.23,
 	}
 
-	res, err := k.UserData.AddOrder(context.Background(), order)
+	res, err := k.Trading.AddOrder(context.Background(), order)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +47,7 @@ func TestUserData_AddOrder(t *testing.T) {
 	assert(expectedResult, res, t)
 }
 
-func TestUserData_CancelOrder(t *testing.T) {
+func TestTrading_CancelOrder(t *testing.T) {
 	mockResponse := []byte(`{"error":[],"result":{"count": 1, "pending": true}}`)
 
 	expectedResult := &CancelOrderResponse{
@@ -67,7 +67,7 @@ func TestUserData_CancelOrder(t *testing.T) {
 	k := NewWithAuth("api_key", "cHJpdmF0ZV9rZXk=")
 	k.BaseURL = ts.URL
 
-	res, err := k.UserData.CancelOrder(context.Background(), 1234)
+	res, err := k.Trading.CancelOrder(context.Background(), 1234)
 	if err != nil {
 		t.Fatal(err)
 	}
