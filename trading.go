@@ -16,7 +16,7 @@ type Trading struct {
 
 // AddOrder adds a standard order via the Kraken API.
 // https://www.kraken.com/en-gb/help/api#add-standard-order
-func (u *UserData) AddOrder(ctx context.Context, order UserOrder) (res *AddOrderResponse, err error) {
+func (t *Trading) AddOrder(ctx context.Context, order UserOrder) (res *AddOrderResponse, err error) {
 	body := url.Values{
 		"pair":      {order.Pair.String()},
 		"type":      {string(order.Type)},
@@ -69,12 +69,12 @@ func (u *UserData) AddOrder(ctx context.Context, order UserOrder) (res *AddOrder
 		body.Add("close[price2]", strconv.FormatFloat(order.ClosedOrderPrice2, 'f', 4, 64))
 	}
 
-	req, err := u.Client.DialWithAuth(ctx, http.MethodPost, AddOrderResource, body)
+	req, err := t.Client.DialWithAuth(ctx, http.MethodPost, AddOrderResource, body)
 	if err != nil {
 		return
 	}
 
-	krakenResp, err := u.Client.Call(req)
+	krakenResp, err := t.Client.Call(req)
 	if err != nil {
 		return
 	}
@@ -85,17 +85,17 @@ func (u *UserData) AddOrder(ctx context.Context, order UserOrder) (res *AddOrder
 
 // CancelOrder cancels an open order via the Kraken API.
 // https://www.kraken.com/en-gb/help/api#cancel-open-order
-func (u *UserData) CancelOrder(ctx context.Context, txid int64) (res *CancelOrderResponse, err error) {
+func (t *Trading) CancelOrder(ctx context.Context, txid int64) (res *CancelOrderResponse, err error) {
 	body := url.Values{
 		"txid": {strconv.FormatInt(txid, 10)},
 	}
 
-	req, err := u.Client.DialWithAuth(ctx, http.MethodPost, CancelOrderResource, body)
+	req, err := t.Client.DialWithAuth(ctx, http.MethodPost, CancelOrderResource, body)
 	if err != nil {
 		return
 	}
 
-	krakenResp, err := u.Client.Call(req)
+	krakenResp, err := t.Client.Call(req)
 	if err != nil {
 		return
 	}
