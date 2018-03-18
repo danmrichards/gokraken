@@ -54,6 +54,7 @@ type Kraken struct {
 	Market     *Market
 	UserData   *UserData
 	Trading    *Trading
+	Funding    *Funding
 	PrivateKey string
 }
 
@@ -95,6 +96,7 @@ func (k *Kraken) initServices() {
 	k.Market = &Market{k}
 	k.UserData = &UserData{k}
 	k.Trading = &Trading{k}
+	k.Funding = &Funding{k}
 }
 
 // GetBaseURL returns the base URI of the Kraken API.
