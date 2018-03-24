@@ -6,6 +6,9 @@ const (
 
 	// DepositAddressesResource is the API resource for deposit addresses.
 	DepositAddressesResource = "DepositAddresses"
+
+	// DepositStatusResource is the API resource for deposit status.
+	DepositStatusResource = "DepositStatus"
 )
 
 // DepositMethodsResponse represents the response from the DepositMethods
@@ -29,4 +32,26 @@ type DepositAddress struct {
 	Address    string `json:"address"`
 	ExpireTime int64  `json:"expiretm"`
 	New        bool   `json:"new"`
+}
+
+// DepositStatusResponse represents the response from the DepositStatus
+// endpoint of the Kraken API.
+type DepositStatusResponse struct {
+	Method     string            `json:"method"`
+	AClass     string            `json:"aclass"`
+	Asset      string            `json:"asset"`
+	RefID      string            `json:"refid"`
+	TxID       string            `json:"txid"`
+	Info       string            `json:"info"`
+	Amount     float64           `json:"amount"`
+	Fee        float64           `json:"fee"`
+	Time       int64             `json:"time"`
+	Status     string            `json:"status"`
+	StatusProp DepositStatusProp `json:"status-prop"`
+}
+
+// DepositStatusProp represents additional status properties on a Kraken deposit
+// status.
+type DepositStatusProp struct {
+	OnHold string `json:"onhold"`
 }

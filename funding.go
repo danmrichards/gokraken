@@ -16,7 +16,7 @@ type Funding struct {
 
 // DepositMethods gets a list of deposit methods via the Kraken API.
 // https://www.kraken.com/en-gb/help/api#deposit-methods
-func (f *Funding) DepositMethods(ctx context.Context, aclass AssetsClass, asset asset.Currency) (res *DepositMethodsResponse, err error) {
+func (f *Funding) DepositMethods(ctx context.Context, aclass AssetsClass, asset asset.Currency) (res DepositMethodsResponse, err error) {
 	body := url.Values{
 		"aclass": {string(aclass)},
 		"asset":  {asset.String()},
@@ -38,7 +38,7 @@ func (f *Funding) DepositMethods(ctx context.Context, aclass AssetsClass, asset 
 
 // DepositAddresses gets a list of deposit addresses via the Kraken API.
 // https://www.kraken.com/en-gb/help/api#deposit-methods
-func (f *Funding) DepositAddresses(ctx context.Context, aclass AssetsClass, asset asset.Currency, method string, new bool) (res *DepositAddressesResponse, err error) {
+func (f *Funding) DepositAddresses(ctx context.Context, aclass AssetsClass, asset asset.Currency, method string, new bool) (res DepositAddressesResponse, err error) {
 	body := url.Values{
 		"aclass": {string(aclass)},
 		"asset":  {asset.String()},
@@ -51,6 +51,29 @@ func (f *Funding) DepositAddresses(ctx context.Context, aclass AssetsClass, asse
 	}
 
 	req, err := f.Client.DialWithAuth(ctx, http.MethodPost, DepositAddressesResource, body)
+	if err != nil {
+		return
+	}
+
+	krakenResp, err := f.Client.Call(req)
+	if err != nil {
+		return
+	}
+
+	err = krakenResp.ExtractResult(&res)
+	return
+}
+
+// DepositStatus gets the status of recent deposits via the Kraken api.
+// https://www.kraken.com/en-gb/help/api#deposit-methods
+func (f *Funding) DepositStatus(ctx context.Context, aclass AssetsClass, asset asset.Currency, method string) (res *DepositStatusResponse, err error) {
+	body := url.Values{
+		"aclass": {string(aclass)},
+		"asset":  {asset.String()},
+		"method": {method},
+	}
+
+	req, err := f.Client.DialWithAuth(ctx, http.MethodPost, DepositStatusResource, body)
 	if err != nil {
 		return
 	}
