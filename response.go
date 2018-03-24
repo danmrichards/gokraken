@@ -16,10 +16,5 @@ func (r *Response) ExtractResult(dst interface{}) error {
 		return err
 	}
 
-	err = json.Unmarshal(resultJSON, &dst)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return json.Unmarshal(resultJSON, &dst)
 }

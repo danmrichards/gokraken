@@ -218,17 +218,16 @@ func TestKraken_Dial(t *testing.T) {
 
 func TestKraken_DialWithAuth(t *testing.T) {
 	cases := []struct {
-		name           string
-		apiKey         string
-		privateKey     string
-		baseURL        string
-		method         string
-		resource       string
-		body           url.Values
-		expectedURL    string
-		expectedError  string
-		decodedPrivate string
-		bodyRegex      *regexp.Regexp
+		name          string
+		apiKey        string
+		privateKey    string
+		baseURL       string
+		method        string
+		resource      string
+		body          url.Values
+		expectedURL   string
+		expectedError string
+		bodyRegex     *regexp.Regexp
 	}{
 		{
 			name:          "no private key",

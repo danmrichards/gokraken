@@ -89,9 +89,5 @@ func generateAssetPackage(pairs assetPairsResponse) error {
 	defer to.Close()
 
 	_, err = io.Copy(to, buf)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
