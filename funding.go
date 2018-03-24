@@ -2,7 +2,6 @@ package gokraken
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/url"
 
@@ -60,8 +59,6 @@ func (f *Funding) DepositAddresses(ctx context.Context, aclass AssetsClass, asse
 	if err != nil {
 		return
 	}
-
-	fmt.Println(krakenResp)
 
 	err = krakenResp.ExtractResult(&res)
 	return
