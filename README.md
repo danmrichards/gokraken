@@ -61,5 +61,5 @@ func main() {
 - [x] Implement public market data endpoints
 - [x] Implement private user data endpoints
 - [x] Implement private user trading endpoints
-- [ ] Implement private user funding endpoints
-- [ ] Test all the things!
+- [x] Implement private user funding endpoints
+- [x] Test all the things!
