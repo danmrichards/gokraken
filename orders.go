@@ -22,10 +22,10 @@ const (
 	// OrderCloseTimeOpen is the time an order opens.
 	OrderCloseTimeOpen OrderCloseTime = "open"
 
-	// OrderCloseTimeOpen is the time an order closes.
+	// OrderCloseTimeClose is the time an order closes.
 	OrderCloseTimeClose OrderCloseTime = "close"
 
-	// OrderCloseTimeOpen is the time an order opens and closes.
+	// OrderCloseTimeBoth is the time an order opens and closes.
 	OrderCloseTimeBoth OrderCloseTime = "both"
 
 	// OpenOrdersResource is the API resource for open orders.
@@ -81,7 +81,7 @@ const (
 	// OrderTypeStopLossAndLimit (price = stop loss price, price2 = limit price).
 	OrderTypeStopLossAndLimit OrderType = "stop-loss-and-limit"
 
-	// OrderTypeSettlePosition.
+	// OrderTypeSettlePosition is the order type for settle and position.
 	OrderTypeSettlePosition OrderType = "settle-position"
 )
 

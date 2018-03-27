@@ -7,7 +7,7 @@ const OpenPositionsResource = "OpenPositions"
 // of the Kraken API.
 type OpenPositionsResponse map[string]Position
 
-// Positions represents a Kraken open position.
+// Position represents a Kraken open position.
 type Position struct {
 	OrderTxid string  `json:"ordertxid"`  // Order responsible for execution of trade.
 	Pair      string  `json:"pair"`       // Asset pair.

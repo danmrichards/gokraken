@@ -42,7 +42,7 @@ type LedgersRequest struct {
 	Ofs    int              // Offset.
 }
 
-// OpenPositionsResponse represents the response from the OpenPositions endpoint
+// LedgersResponse represents the response from the OpenPositions endpoint
 // of the Kraken API.
 type LedgersResponse map[string]Ledger
 

@@ -14,7 +14,7 @@ const (
 // Kraken API.
 type BalanceResponse map[asset.Currency]float64
 
-// BalanceResponse represents the response from the TradeBalance endpoint of the
+// TradeBalanceResponse represents the response from the TradeBalance endpoint of the
 // Kraken API.
 type TradeBalanceResponse struct {
 	EquivalentBalance float64 `json:"eb"`

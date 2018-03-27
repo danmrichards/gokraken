@@ -113,7 +113,7 @@ type UserTrade struct {
 	Misc      string       `json:"misc"`
 }
 
-// QueryTradesResponse represents the response from the TradeVolume endpoint
+// TradeVolumeResponse represents the response from the TradeVolume endpoint
 // of the Kraken API.
 type TradeVolumeResponse struct {
 	Currency  string         `json:"currency"`

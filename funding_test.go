@@ -110,3 +110,123 @@ func TestFunding_DepositStatus(t *testing.T) {
 
 	assert(expectedResult, res, t)
 }
+
+func TestFunding_WithdrawInfo(t *testing.T) {
+	mockResponse := []byte(`{"error":[],"result":{"method":"test","limit":1.23,"fee":0.12}}`)
+
+	expectedResult := &WithdrawInfoResponse{
+		Method: "test",
+		Limit:  1.23,
+		Fee:    0.12,
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		w.Write(mockResponse)
+	}))
+
+	defer ts.Close()
+
+	k := NewWithAuth("api_key", "cHJpdmF0ZV9rZXk=")
+	k.BaseURL = ts.URL
+
+	res, err := k.Funding.WithdrawInfo(context.Background(), AssetCurrency, asset.BCH, "test", 2.34)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert(expectedResult, res, t)
+}
+
+func TestFunding_Withdraw(t *testing.T) {
+	mockResponse := []byte(`{"error":[],"result":{"refid":"foo"}}`)
+
+	expectedResult := &WithdrawResponse{
+		RefID: "foo",
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		w.Write(mockResponse)
+	}))
+
+	defer ts.Close()
+
+	k := NewWithAuth("api_key", "cHJpdmF0ZV9rZXk=")
+	k.BaseURL = ts.URL
+
+	res, err := k.Funding.Withdraw(context.Background(), AssetCurrency, asset.BCH, "test", 2.34)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert(expectedResult, res, t)
+}
+
+func TestFunding_WithdrawStatus(t *testing.T) {
+	mockResponse := []byte(`{"error":[],"result":[{"method":"test","aclass":"currency","asset":"BCH","refid":"1234","txid":"4321","info":"foo","float64":1.23,"fee":3.21,"time":1522180241,"status":"bar","status-prop":{"cancel-pending":false,"canceled":false,"cancel-denied":true,"return":false,"onhold":false}}]}`)
+
+	expectedResult := WithdrawStatusResponse{
+		{
+			Method: "test",
+			Aclass: string(AssetCurrency),
+			Asset:  asset.BCH.String(),
+			RefID:  "1234",
+			TxID:   "4321",
+			Info:   "foo",
+			Amount: 1.23,
+			Fee:    3.21,
+			Time:   1522180241,
+			Status: "bar",
+			StatusProp: WithdrawStatusProp{
+				CancelDenied: true,
+			},
+		},
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		w.Write(mockResponse)
+	}))
+
+	defer ts.Close()
+
+	k := NewWithAuth("api_key", "cHJpdmF0ZV9rZXk=")
+	k.BaseURL = ts.URL
+
+	res, err := k.Funding.WithdrawStatus(context.Background(), AssetCurrency, asset.BCH, "test")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert(expectedResult, res, t)
+}
+
+func TestFunding_WithdrawCancel(t *testing.T) {
+	mockResponse := []byte(`{"error":[],"result":true}`)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		w.Write(mockResponse)
+	}))
+
+	defer ts.Close()
+
+	k := NewWithAuth("api_key", "cHJpdmF0ZV9rZXk=")
+	k.BaseURL = ts.URL
+
+	res, err := k.Funding.WithdrawCancel(context.Background(), AssetCurrency, asset.BCH, "test")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert(true, res, t)
+}
